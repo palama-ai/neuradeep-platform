@@ -1,0 +1,280 @@
+{
+  "b8ae09de-3346-47da-9175-064f6be79d7d": [
+    {
+      "id": "1e2188ed-832e-4840-be52-f3604baec600",
+      "title": "New Chat",
+      "messages": [],
+      "createdAt": "2026-04-04T00:27:27.974Z"
+    },
+    {
+      "id": "ef7a60cd-bb99-4b5d-b0da-5f4216f1a8b4",
+      "title": "New Chat",
+      "messages": [],
+      "createdAt": "2026-04-04T00:27:28.581Z"
+    },
+    {
+      "id": "1564c629-0f47-42a8-8435-e992c8cef122",
+      "title": "New Chat",
+      "messages": [],
+      "createdAt": "2026-04-04T00:27:29.371Z"
+    },
+    {
+      "id": "cc9e145f-710c-4bcc-9744-4140681c3e44",
+      "title": "hi",
+      "messages": [
+        {
+          "id": "e988c898-f31a-4f24-9af7-91de73b2bafe",
+          "role": "user",
+          "content": "hi",
+          "createdAt": "2026-04-04T00:27:47.486Z"
+        }
+      ],
+      "createdAt": "2026-04-04T00:27:41.702Z"
+    },
+    {
+      "id": "10048395-a5d0-4e53-962e-f3df3679264a",
+      "title": "New Chat",
+      "messages": [],
+      "createdAt": "2026-04-04T00:27:59.096Z"
+    },
+    {
+      "id": "ff575018-be3e-4647-abc1-7ae7e187a603",
+      "title": "open word",
+      "messages": [
+        {
+          "id": "b7e0efc8-127b-4f5f-b23c-b03a0bd3d34f",
+          "role": "user",
+          "content": "open word",
+          "createdAt": "2026-04-04T09:13:43.985Z"
+        },
+        {
+          "id": "55f53e2f-c557-4c5e-9662-1b0b756fc260",
+          "role": "agent",
+          "content": "🔧 Starting step 1/1: Open Microsoft Word application",
+          "createdAt": "2026-04-04T09:13:50.982Z"
+        },
+        {
+          "id": "75152ca9-1271-49e2-82b3-20a26d7019d3",
+          "role": "agent",
+          "content": "✅ Step 1 done!",
+          "createdAt": "2026-04-04T09:15:15.663Z"
+        },
+        {
+          "id": "e3328216-5321-4603-8a29-51240ddb563e",
+          "role": "agent",
+          "content": "🎉 All 1 step(s) finished! Let me know if you need anything else.",
+          "createdAt": "2026-04-04T09:15:16.172Z"
+        }
+      ],
+      "createdAt": "2026-04-04T09:13:33.309Z"
+    },
+    {
+      "id": "634a6c79-5afc-4755-808e-d5afcc4a178b",
+      "title": "open word",
+      "messages": [
+        {
+          "id": "db2b9d46-df6f-4044-99bc-6d3789e6f14e",
+          "role": "user",
+          "content": "open word",
+          "createdAt": "2026-04-04T09:25:09.163Z"
+        },
+        {
+          "id": "df78f77c-cce4-4591-8e25-3ccdcad3b3c6",
+          "role": "agent",
+          "content": "🎉 All 1 step(s) finished! Let me know if you need anything else.",
+          "createdAt": "2026-04-04T09:26:42.563Z"
+        }
+      ],
+      "createdAt": "2026-04-04T09:25:09.125Z"
+    },
+    {
+      "id": "147f4c9e-97b1-4d2b-931a-5f7e3c64ba76",
+      "title": "open word",
+      "messages": [
+        {
+          "id": "f572aa6b-ab53-4bfb-92f4-2afbaf23e9da",
+          "role": "user",
+          "content": "open word",
+          "createdAt": "2026-04-04T09:36:42.636Z"
+        }
+      ],
+      "createdAt": "2026-04-04T09:36:42.609Z"
+    },
+    {
+      "id": "83dd907f-6683-4330-80cb-1fc5548bf624",
+      "title": "open word",
+      "messages": [
+        {
+          "id": "36fc45ae-5591-4166-b791-042497bc1169",
+          "role": "user",
+          "content": "open word",
+          "createdAt": "2026-04-04T09:41:29.277Z"
+        },
+        {
+          "id": "229dad0f-f7e7-4195-bb46-45902a6ff932",
+          "role": "user",
+          "content": "Approve",
+          "createdAt": "2026-04-04T09:42:09.278Z"
+        },
+        {
+          "id": "a9f31d35-302f-4ccd-a0c7-f9c3974edbcb",
+          "role": "agent",
+          "content": "🎉 All 1 step(s) finished! Let me know if you need anything else.",
+          "createdAt": "2026-04-04T09:43:29.752Z"
+        }
+      ],
+      "createdAt": "2026-04-04T09:41:29.248Z"
+    },
+    {
+      "id": "d5107d19-b499-4900-bd07-7dbeec4f36c3",
+      "title": "open word and write hi",
+      "messages": [
+        {
+          "id": "c6d3b132-4bad-40a2-90db-07de3a6e13bb",
+          "role": "user",
+          "content": "open word and write hi",
+          "createdAt": "2026-04-04T10:02:04.699Z"
+        },
+        {
+          "id": "f5a8d2f9-0ed6-4a89-abfa-1ece6f45e0ac",
+          "role": "user",
+          "content": "Edit",
+          "createdAt": "2026-04-04T10:02:59.823Z"
+        },
+        {
+          "id": "3945e17f-5d4e-44c3-a073-8105a947e316",
+          "role": "user",
+          "content": "Approve",
+          "createdAt": "2026-04-04T10:03:53.215Z"
+        },
+        {
+          "id": "0b5c34b7-e9fb-42e9-8c83-f954d506918c",
+          "role": "agent",
+          "content": "I've opened Microsoft Word successfully. Now I'll write 'hi' for you.",
+          "createdAt": "2026-04-04T10:05:17.253Z"
+        },
+        {
+          "id": "2f94bfb1-52ad-4630-87a4-1f01db2566c3",
+          "role": "agent",
+          "content": "All done! I opened Microsoft Word and wrote 'hi' as requested. Is there anything else I can help you with?",
+          "createdAt": "2026-04-04T10:11:34.784Z"
+        }
+      ],
+      "createdAt": "2026-04-04T10:02:04.664Z"
+    },
+    {
+      "id": "a5c6650a-23f4-4e40-ba8b-83ee6b13a253",
+      "title": "hello",
+      "messages": [
+        {
+          "id": "9513316c-4e77-4725-bf60-1b621001f534",
+          "role": "user",
+          "content": "hello",
+          "createdAt": "2026-04-04T10:40:07.219Z"
+        }
+      ],
+      "createdAt": "2026-04-04T10:40:07.182Z"
+    },
+    {
+      "id": "02dd96ef-9496-4cd4-a82b-f7d376f55ca9",
+      "title": "hello",
+      "messages": [
+        {
+          "id": "57453c19-62b6-4bba-9adf-d4f273021510",
+          "role": "user",
+          "content": "hello",
+          "createdAt": "2026-04-04T10:46:19.206Z"
+        },
+        {
+          "id": "1b7c5b2c-b5b5-42bd-8d29-8172502ba1dc",
+          "role": "user",
+          "content": "whats your name",
+          "createdAt": "2026-04-04T10:47:45.184Z"
+        },
+        {
+          "id": "bbc4e8b5-922a-4d5b-8ed1-402a63561b1b",
+          "role": "user",
+          "content": "do you know my name",
+          "createdAt": "2026-04-04T10:48:19.673Z"
+        },
+        {
+          "id": "ed743b92-9c25-45e8-9642-b43afa6422c7",
+          "role": "user",
+          "content": "my name is ayoub",
+          "createdAt": "2026-04-04T10:48:48.229Z"
+        }
+      ],
+      "createdAt": "2026-04-04T10:46:19.169Z"
+    },
+    {
+      "id": "999d689f-11e7-48f6-a641-3541dea2a399",
+      "title": "hello",
+      "messages": [
+        {
+          "id": "e955e407-9da8-4e17-8552-d7a221c903fe",
+          "role": "user",
+          "content": "hello",
+          "createdAt": "2026-04-04T10:54:42.292Z"
+        }
+      ],
+      "createdAt": "2026-04-04T10:54:42.256Z"
+    },
+    {
+      "id": "5cb99d21-1cd5-42a4-aa63-6e925ef85c8d",
+      "title": "hello",
+      "messages": [
+        {
+          "id": "e4531b3b-380b-4e35-8f33-a24482b8f309",
+          "role": "user",
+          "content": "hello",
+          "createdAt": "2026-04-04T11:00:19.182Z"
+        },
+        {
+          "id": "756b8258-83c3-4d49-8d3b-46f4f166feeb",
+          "role": "user",
+          "content": "how are you",
+          "createdAt": "2026-04-04T11:00:59.048Z"
+        }
+      ],
+      "createdAt": "2026-04-04T11:00:19.169Z"
+    },
+    {
+      "id": "af03768b-dd22-4f2e-9f9b-1bf06ff6677d",
+      "title": "افتح وورد",
+      "messages": [
+        {
+          "id": "7bd1ff0e-16b1-44d9-9138-eadf00cd0665",
+          "role": "user",
+          "content": "افتح وورد",
+          "createdAt": "2026-04-04T11:06:32.034Z"
+        },
+        {
+          "id": "622ec15b-6a88-4a0e-9e1b-8ce687f71f5a",
+          "role": "user",
+          "content": "Approve",
+          "createdAt": "2026-04-04T11:06:53.286Z"
+        },
+        {
+          "id": "10f6e492-9415-44e2-b1be-9c76eddc0e8c",
+          "role": "agent",
+          "content": "تم فتح تطبيق وورد بنجاح. هل تحتاج إلى أي شيء آخر؟",
+          "createdAt": "2026-04-04T11:09:32.960Z"
+        }
+      ],
+      "createdAt": "2026-04-04T11:06:32.020Z"
+    },
+    {
+      "id": "376ed594-8aa3-4e87-871a-81393ac5a7d6",
+      "title": "Hi palama do you know my name ...",
+      "messages": [
+        {
+          "id": "0ebe4fb7-1782-4100-bcd5-4cd8a23b35af",
+          "role": "user",
+          "content": "Hi palama do you know my name ?",
+          "createdAt": "2026-04-04T11:19:22.542Z"
+        }
+      ],
+      "createdAt": "2026-04-04T11:19:22.527Z"
+    }
+  ]
+}

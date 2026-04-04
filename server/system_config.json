@@ -1,0 +1,4 @@
+{
+  "THINKING_MODEL": "openai/gpt-oss-120b",
+  "VISION_MODEL": "qwen/qwen3-vl-235b-a22b-instruct"
+}

@@ -1,0 +1,93 @@
+// f:/palama-persona-v1/neuradeepai-platform/server/prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                 String     @id @default(uuid())
+  email              String     @unique
+  passwordHash       String
+  fullName           String?
+  role               String     @default("user") // "user" | "admin"
+  plan               String     @default("free") // "free" | "pro" | "enterprise"
+  tokensLimitMonthly BigInt     @default(100000)
+  tokensUsedTotal    BigInt     @default(0)
+  isActive           Boolean    @default(true)
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+  
+  sessions           Session[]
+  usageLogs          UsageLog[]
+  chatSessions       ChatSession[]
+}
+
+model ApiKey {
+  id           String   @id @default(uuid())
+  provider     String   // "openrouter" | "groq" | "gemini"
+  apiKey       String   // Encrypted
+  isActive     Boolean  @default(true)
+  monthlyBudget Decimal? @default(0)
+  currentSpend  Decimal  @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  updatedById  String?
+}
+
+model UsageLog {
+  id           BigInt   @id @default(autoincrement())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id])
+  model        String
+  provider     String
+  inputTokens  Int
+  outputTokens Int
+  totalTokens  Int
+  costUsd      Decimal
+  taskType     String?
+  createdAt    DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([createdAt])
+  @@index([model])
+}
+
+model Session {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  token      String   @unique
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+}
+
+model GlobalConfig {
+  id        String   @id @default(uuid())
+  key       String   @unique // e.g. "THINKING_MODEL"
+  value     String   // e.g. "groq:deepseek-r1-distill-llama-70b"
+  updatedAt DateTime @updatedAt
+}
+
+model ChatSession {
+  id        String        @id @default(uuid())
+  userId    String
+  user      User          @relation(fields: [userId], references: [id])
+  title     String?       @default("New Chat")
+  messages  ChatMessage[]
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+}
+
+model ChatMessage {
+  id        String      @id @default(uuid())
+  sessionId String
+  session   ChatSession @relation(fields: [sessionId], references: [id])
+  role      String      // "user" | "agent" | "system"
+  content   String      @db.Text
+  createdAt DateTime    @default(now())
+}
