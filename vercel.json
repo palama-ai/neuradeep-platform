@@ -23,7 +23,7 @@
     },
     {
       "source": "/(.*)",
-      "destination": "/$1"
+      "destination": "/client/$1"
     }
   ]
 }
