@@ -38,7 +38,9 @@ export default function LoginPage() {
       }
 
     } catch (err) {
-      setError(err.response?.data?.error || 'Login failed. Please check your credentials.');
+      const errorData = err.response?.data?.error;
+      const errorMsg = typeof errorData === 'string' ? errorData : (errorData?.message || 'Login failed. Please check your credentials.');
+      setError(errorMsg);
     } finally {
       setLoading(false);
     }
