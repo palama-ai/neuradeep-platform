@@ -23,28 +23,28 @@ router.post('/completions', authMiddleware, async (req, res) => {
   }
 
   try {
-    // 1. Get user profile and check monthly usage
-    const user = await prisma.user.findUnique({ where: { id: userId } });
+    // 1. Parallelize user profile and API key lookup for speed
+    const [user, apiKeyDoc] = await Promise.all([
+      prisma.user.findUnique({ where: { id: userId } }),
+      prisma.apiKey.findFirst({
+        where: { provider: detectProvider(model), isActive: true }
+      })
+    ]);
+
     if (!user) return res.status(404).json({ error: 'User not found' });
+    if (!apiKeyDoc) return res.status(503).json({ error: `Provider for ${model} is currently unavailable` });
 
-    const currentUsage = await getMonthlyUsage(userId);
-    if (BigInt(currentUsage) >= user.tokensLimitMonthly) {
-      return res.status(429).json({
-        error: 'Monthly token limit exceeded',
-        usage: currentUsage,
-        limit: user.tokensLimitMonthly.toString(),
-        upgrade_url: 'https://neuradeepai.com/dashboard/plans'
-      });
-    }
-
-    // 2. Identify provider and fetch API key
-    const provider = detectProvider(model);
-    const apiKeyDoc = await prisma.apiKey.findFirst({
-      where: { provider, isActive: true }
-    });
-
-    if (!apiKeyDoc) {
-      return res.status(503).json({ error: `Provider ${provider} is currently unavailable` });
+    // 2. Simplified/Optimized Quota Check
+    // Skip expensive monthly aggregation if the total usage is already well below the limit
+    if (BigInt(user.tokensUsedTotal) > user.tokensLimitMonthly) {
+       const currentUsage = await getMonthlyUsage(userId);
+       if (BigInt(currentUsage) >= user.tokensLimitMonthly) {
+          return res.status(429).json({
+            error: 'Monthly token limit exceeded',
+            usage: currentUsage,
+            limit: user.tokensLimitMonthly.toString()
+          });
+       }
     }
 
     // 3. Forward request to actual LLM
