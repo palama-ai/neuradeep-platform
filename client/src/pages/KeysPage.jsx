@@ -60,25 +60,25 @@ const KeysPage = () => {
     <div className="space-y-8 animate-in fade-in slide-in-from-right-10 duration-700">
       <div className="flex justify-between items-end">
         <div>
-          <h1 className="text-3xl font-display font-bold text-gray-900 tracking-tight mb-2">API Provider Keys</h1>
-          <p className="text-gray-500">Securely manage your high-level LLM credentials and budgets.</p>
+          <h1 className="text-3xl font-display font-bold text-white tracking-tight mb-2">API Provider Keys</h1>
+          <p className="text-text-secondary">Securely manage your high-level LLM credentials and budgets.</p>
         </div>
         <button 
           onClick={() => setShowAddForm(!showAddForm)}
-          className="flex items-center gap-2 px-5 py-2.5 bg-brand-600 text-white rounded-xl font-bold shadow-lg shadow-brand-200 hover:bg-brand-700 transition-all active:scale-95"
+          className="gradient-btn flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold transition-all"
         >
           {showAddForm ? 'View Keys' : <><Plus size={18} /> Add New Key</>}
         </button>
       </div>
 
       {showAddForm ? (
-        <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-gray-100 max-w-2xl mx-auto animate-in zoom-in-95 duration-300">
+        <div className="surface-card p-8 max-w-2xl mx-auto animate-in zoom-in-95 duration-300">
           <form onSubmit={handleAddKey} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2 ml-1">Provider</label>
+                <label className="block text-sm font-semibold text-text-secondary mb-2 ml-1">Provider</label>
                 <select 
-                  className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-brand-100 outline-none transition-all font-medium"
+                  className="w-full px-5 py-4 bg-[var(--surface-hover)] border border-[var(--border)] text-white rounded-2xl focus:ring-2 focus:ring-[rgba(255,255,255,0.2)] focus:border-white outline-none transition-all font-medium"
                   value={newKey.provider}
                   onChange={e => setNewKey({...newKey, provider: e.target.value})}
                 >
@@ -88,34 +88,34 @@ const KeysPage = () => {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2 ml-1">Monthly Budget ($)</label>
+                <label className="block text-sm font-semibold text-text-secondary mb-2 ml-1">Monthly Budget ($)</label>
                 <input
                   type="number"
-                  className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-brand-100 outline-none transition-all"
+                  className="w-full px-5 py-4 bg-[var(--surface-hover)] border border-[var(--border)] text-white rounded-2xl focus:ring-2 focus:ring-[rgba(255,255,255,0.2)] focus:border-white outline-none transition-all"
                   value={newKey.monthlyBudget}
                   onChange={e => setNewKey({...newKey, monthlyBudget: parseFloat(e.target.value)})}
                 />
               </div>
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2 ml-1">Secret API Key</label>
+              <label className="block text-sm font-semibold text-text-secondary mb-2 ml-1">Secret API Key</label>
               <div className="relative">
-                <Key className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                <Key className="absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary" size={18} />
                 <input
                   type="password"
                   required
                   placeholder="sk-or-v1-..."
-                  className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-brand-100 outline-none transition-all"
+                  className="w-full pl-12 pr-4 py-4 bg-[var(--surface-hover)] border border-[var(--border)] text-white rounded-2xl focus:ring-2 focus:ring-[rgba(255,255,255,0.2)] focus:border-white outline-none transition-all placeholder:text-[rgba(255,255,255,0.2)]"
                   value={newKey.apiKey}
                   onChange={e => setNewKey({...newKey, apiKey: e.target.value})}
                 />
               </div>
-              <p className="mt-4 text-xs text-amber-600 flex items-center gap-2 bg-amber-50 p-3 rounded-xl border border-amber-100">
+              <p className="mt-4 text-xs text-amber-500 flex items-center gap-2 bg-[rgba(245,158,11,0.1)] p-3 rounded-xl border border-[rgba(245,158,11,0.2)]">
                 <ShieldCheck size={14} />
                 This key will be encrypted using AES-256 before storage.
               </p>
             </div>
-            <button className="w-full py-4 bg-gray-900 text-white rounded-2xl font-bold text-lg hover:bg-black transition-all shadow-xl">
+            <button className="gradient-btn w-full py-4 rounded-2xl font-bold text-lg shadow-xl">
               Save Secure Credential
             </button>
           </form>
@@ -123,58 +123,58 @@ const KeysPage = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {loading ? (
-            <div className="col-span-full py-20 flex justify-center"><RefreshCw className="animate-spin text-brand-600" /></div>
+            <div className="col-span-full py-20 flex justify-center"><RefreshCw className="animate-spin text-text-secondary" /></div>
           ) : keys.map((key) => (
-            <div key={key.id} className="bg-white p-6 rounded-[2.5rem] shadow-sm border border-gray-100 hover:shadow-md transition-all group">
+            <div key={key.id} className="surface-card p-6 hover:border-[rgba(255,255,255,0.15)] transition-all group">
               <div className="flex justify-between items-start mb-6">
                 <div className={`p-3 rounded-2xl ${
-                  key.provider === 'openrouter' ? 'bg-blue-50 text-blue-600' :
-                  key.provider === 'groq' ? 'bg-indigo-50 text-indigo-600' :
-                  'bg-amber-50 text-amber-600'
+                  key.provider === 'openrouter' ? 'bg-[rgba(59,130,246,0.1)] text-blue-400 border border-[rgba(59,130,246,0.2)]' :
+                  key.provider === 'groq' ? 'bg-[rgba(99,102,241,0.1)] text-indigo-400 border border-[rgba(99,102,241,0.2)]' :
+                  'bg-[rgba(245,158,11,0.1)] text-amber-500 border border-[rgba(245,158,11,0.2)]'
                 }`}>
                   <Zap size={24} fill="currentColor" />
                 </div>
                 <button 
                   onClick={() => deleteKey(key.id)}
-                  className="p-2 text-gray-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                  className="p-2 text-text-secondary hover:text-red-400 hover:bg-[rgba(239,68,68,0.1)] rounded-lg transition-colors opacity-0 group-hover:opacity-100"
                 >
                   <Trash2 size={18} />
                 </button>
               </div>
               
-              <h3 className="text-xl font-display font-bold text-gray-900 capitalize mb-1">{key.provider}</h3>
-              <p className="text-xs font-mono text-gray-400 mb-6">{key.apiKeyMasked}</p>
+              <h3 className="text-xl font-display font-bold text-white capitalize mb-1">{key.provider}</h3>
+              <p className="text-xs font-mono text-text-secondary mb-6">{key.apiKeyMasked}</p>
               
               <div className="space-y-4">
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-500 font-medium">Monthly Spend</span>
-                  <span className="font-bold text-gray-900">${Number(key.currentSpend).toFixed(2)}</span>
+                  <span className="text-text-secondary font-medium">Monthly Spend</span>
+                  <span className="font-bold text-white">${Number(key.currentSpend).toFixed(2)}</span>
                 </div>
-                <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                <div className="w-full h-1.5 bg-[var(--surface-hover)] rounded-full overflow-hidden border border-[var(--border)]">
                   <div 
-                    className={`h-full rounded-full ${key.currentSpend > key.monthlyBudget ? 'bg-rose-500' : 'bg-emerald-500'}`}
+                    className={`h-full rounded-full ${key.currentSpend > key.monthlyBudget ? 'bg-red-500' : 'bg-success'}`}
                     style={{ width: `${Math.min((Number(key.currentSpend) / Number(key.monthlyBudget)) * 100, 100)}%` }}
                   ></div>
                 </div>
-                <div className="flex justify-between items-center text-[10px] uppercase tracking-widest font-bold text-gray-400">
+                <div className="flex justify-between items-center text-[10px] uppercase tracking-widest font-bold text-text-secondary">
                   <span>Usage: {((Number(key.currentSpend) / Number(key.monthlyBudget)) * 100).toFixed(1)}%</span>
                   <span>Limit: ${Number(key.monthlyBudget)}</span>
                 </div>
               </div>
 
-              <div className="mt-6 pt-6 border-t border-gray-50 flex justify-between items-center">
-                <span className={`flex items-center gap-1 text-xs font-bold ${key.isActive ? 'text-emerald-500' : 'text-rose-500'}`}>
+              <div className="mt-6 pt-6 border-t border-[var(--border)] flex justify-between items-center">
+                <span className={`flex items-center gap-1 text-xs font-bold ${key.isActive ? 'text-success' : 'text-red-400'}`}>
                   {key.isActive ? <CheckCircle2 size={14} /> : <AlertCircle size={14} />}
                   {key.isActive ? 'OPERATIONAL' : 'OFFLINE'}
                 </span>
-                <span className="text-[10px] text-gray-400 font-medium italic">SSL Encrypted</span>
+                <span className="text-[10px] text-text-secondary font-medium italic">SSL Encrypted</span>
               </div>
             </div>
           ))}
           {keys.length === 0 && !loading && (
-            <div className="col-span-full bg-gray-50/50 border-2 border-dashed border-gray-200 rounded-[2.5rem] p-20 text-center">
-              <Key size={48} className="mx-auto text-gray-300 mb-4" />
-              <p className="text-gray-500 font-medium">No API keys found. Add one to start the proxy service.</p>
+            <div className="col-span-full bg-[rgba(255,255,255,0.02)] border-2 border-dashed border-[var(--border)] rounded-[2.5rem] p-20 text-center">
+              <Key size={48} className="mx-auto text-text-secondary mb-4 opacity-50" />
+              <p className="text-text-secondary font-medium">No API keys found. Add one to start the proxy service.</p>
             </div>
           )}
         </div>

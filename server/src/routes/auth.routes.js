@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs');
 const { PrismaClient } = require('@prisma/client');
 const { generateAccessToken } = require('../utils/auth');
 const { authMiddleware } = require('../middleware/auth.middleware');
+const { uploadAvatar } = require('../services/cloudinary.service');
 const router = express.Router();
 const prisma = new PrismaClient();
 
@@ -61,6 +62,7 @@ router.get('/me', authMiddleware, async (req, res) => {
         id: true,
         email: true,
         fullName: true,
+        profileImage: true,
         role: true,
         plan: true,
         tokensLimitMonthly: true,
@@ -94,6 +96,33 @@ router.patch('/profile', authMiddleware, async (req, res) => {
     res.json({ success: true, user: { id: user.id, fullName: user.fullName } });
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+});
+
+// ─── Avatar Upload (Cloudinary) ───
+
+router.post('/avatar', authMiddleware, async (req, res) => {
+  const userId = req.user.id;
+  const { avatar } = req.body;
+
+  if (!avatar) {
+    return res.status(400).json({ error: 'No avatar data provided' });
+  }
+
+  try {
+    // Upload to Cloudinary
+    const { url } = await uploadAvatar(avatar, userId);
+
+    // Save URL to database
+    await prisma.user.update({
+      where: { id: userId },
+      data: { profileImage: url }
+    });
+
+    res.json({ success: true, profileImage: url });
+  } catch (err) {
+    console.error('[Avatar Upload Error]:', err.message);
+    res.status(500).json({ error: 'Avatar upload failed: ' + err.message });
   }
 });
 

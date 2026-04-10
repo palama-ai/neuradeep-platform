@@ -7,11 +7,13 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // ─── Middleware ───
-app.use(express.json({ limit: '5mb' }));
+app.use(express.json({ limit: '10mb' }));
 app.use(cors({
     origin: [
         'https://neuradeepai.com',
         'http://localhost:5173', // Vite default dev port
+        'http://localhost:5001', // Palama Agent Flask backend
+        'http://localhost:3000', // Dev React
         'palama://'  // Desktop app custom protocol
     ],
     credentials: true

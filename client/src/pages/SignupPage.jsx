@@ -40,8 +40,8 @@ export default function SignupPage() {
   return (
     <div className="glass p-10 rounded-3xl w-full max-w-md shadow-2xl animate-in slide-in-from-bottom-10 duration-500">
       <div className="text-center mb-8">
-        <h1 className="text-4xl font-display font-bold text-gray-900 mb-2">Join Us</h1>
-        <p className="text-gray-500">Create your NeuraDeepAI account</p>
+        <h1 className="text-4xl font-display font-bold text-gradient mb-2">Join Us</h1>
+        <p className="text-text-secondary">Create your NeuraDeepAI account</p>
       </div>
 
       {error && (
@@ -52,11 +52,11 @@ export default function SignupPage() {
 
       <form onSubmit={handleSignup} className="space-y-4">
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2 ml-1">Full Name</label>
+          <label className="block text-sm font-semibold text-text-secondary mb-2 ml-1">Full Name</label>
           <input
             type="text"
             required
-            className="w-full px-5 py-4 bg-white/50 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-brand-100 focus:border-brand-500 outline-none transition-all"
+            className="w-full px-5 py-4 bg-[var(--surface-hover)] border border-[var(--border)] text-text-primary rounded-2xl focus:ring-2 focus:ring-[rgba(255,255,255,0.2)] focus:border-white outline-none transition-all placeholder:text-[rgba(255,255,255,0.2)]"
             placeholder="John Doe"
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
@@ -64,11 +64,11 @@ export default function SignupPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2 ml-1">Email Address</label>
+          <label className="block text-sm font-semibold text-text-secondary mb-2 ml-1">Email Address</label>
           <input
             type="email"
             required
-            className="w-full px-5 py-4 bg-white/50 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-brand-100 focus:border-brand-500 outline-none transition-all"
+            className="w-full px-5 py-4 bg-[var(--surface-hover)] border border-[var(--border)] text-text-primary rounded-2xl focus:ring-2 focus:ring-[rgba(255,255,255,0.2)] focus:border-white outline-none transition-all placeholder:text-[rgba(255,255,255,0.2)]"
             placeholder="name@company.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -76,11 +76,11 @@ export default function SignupPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2 ml-1">Password</label>
+          <label className="block text-sm font-semibold text-text-secondary mb-2 ml-1">Password</label>
           <input
             type="password"
             required
-            className="w-full px-5 py-4 bg-white/50 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-brand-100 focus:border-brand-500 outline-none transition-all"
+            className="w-full px-5 py-4 bg-[var(--surface-hover)] border border-[var(--border)] text-text-primary rounded-2xl focus:ring-2 focus:ring-[rgba(255,255,255,0.2)] focus:border-white outline-none transition-all placeholder:text-[rgba(255,255,255,0.2)]"
             placeholder="••••••••"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -90,15 +90,15 @@ export default function SignupPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-4 bg-brand-600 hover:bg-brand-700 text-white rounded-2xl font-bold text-lg shadow-lg shadow-brand-200 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed mt-4"
+          className="gradient-btn w-full py-4 rounded-2xl font-bold text-lg transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed mt-4"
         >
           {loading ? 'Creating Account...' : 'Get Started'}
         </button>
       </form>
 
-      <div className="mt-8 text-center text-sm text-gray-600">
+      <div className="mt-8 text-center text-sm text-text-secondary">
         Already have an account?{' '}
-        <button onClick={() => navigate('/auth/login')} className="text-brand-600 font-bold hover:underline">
+        <button onClick={() => navigate('/auth/login')} className="text-white font-bold hover:underline">
           Sign In
         </button>
       </div>

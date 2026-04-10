@@ -14,6 +14,7 @@ model User {
   email              String     @unique
   passwordHash       String
   fullName           String?
+  profileImage       String?
   role               String     @default("user") // "user" | "admin"
   plan               String     @default("free") // "free" | "pro" | "enterprise"
   tokensLimitMonthly BigInt     @default(100000)

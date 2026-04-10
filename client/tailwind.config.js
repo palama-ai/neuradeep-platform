@@ -16,10 +16,18 @@ export default {
           500: '#3b68f5',
           600: '#355ddd',
           700: '#2c4db8',
-          800: '#233e93',
-          900: '#1d3278',
         },
+        surface: 'var(--surface)',
+        'surface-hover': 'var(--surface-hover)',
+        sidebar: 'var(--sidebar-bg)',
+        'text-primary': 'var(--text)',
+        'text-secondary': 'var(--text-secondary)',
+        border: 'var(--border)'
       },
+      fontFamily: {
+        sans: ['Inter', 'sans-serif'],
+        display: ['Playfair Display', 'serif'],
+      }
     },
   },
   plugins: [],

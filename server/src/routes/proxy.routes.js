@@ -51,25 +51,42 @@ router.post('/completions', authMiddleware, async (req, res) => {
     // 4. Log usage and update user atoms
     const tokens = llmResponse.usage;
     if (tokens) {
-      const { prompt_tokens, completion_tokens, total_tokens } = tokens;
+      // 4.1. Accurately extract input and output tokens, handling both snake_case and camelCase
+      const input_tokens = tokens.prompt_tokens || tokens.promptTokens || 0;
+      const output_tokens = tokens.completion_tokens || tokens.completionTokens || 0;
+      const t_tokens = tokens.total_tokens || tokens.totalTokens || (input_tokens + output_tokens);
+
+      // 4.2. Calculate fractional cost based on provider (estimation per 1M tokens)
+      const MODEL_PRICES = {
+        'groq': { in: 0.5, out: 0.5 },
+        'gemini': { in: 0.35, out: 1.05 },
+        'openrouter': { in: 1.0, out: 2.0 }
+      };
       
-      // Atomic usage logging
+      const rates = MODEL_PRICES[provider] || { in: 0, out: 0 };
+      const costUsd = ((input_tokens / 1000000) * rates.in) + ((output_tokens / 1000000) * rates.out);
+
+      // Atomic usage logging and spend increment
       await prisma.$transaction([
         prisma.usageLog.create({
           data: {
             userId,
             model,
             provider,
-            inputTokens: prompt_tokens,
-            outputTokens: completion_tokens,
-            totalTokens: total_tokens,
-            costUsd: 0, // Simplified for now
+            inputTokens: input_tokens,
+            outputTokens: output_tokens,
+            totalTokens: t_tokens,
+            costUsd: costUsd,
             taskType: 'chat'
           }
         }),
         prisma.user.update({
           where: { id: userId },
-          data: { tokensUsedTotal: { increment: BigInt(total_tokens) } }
+          data: { tokensUsedTotal: { increment: BigInt(t_tokens) } }
+        }),
+        prisma.apiKey.update({
+          where: { id: apiKeyDoc.id },
+          data: { currentSpend: { increment: costUsd } }
         })
       ]);
     }

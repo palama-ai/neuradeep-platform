@@ -118,4 +118,39 @@ router.post('/refund', authMiddleware, async (req, res) => {
     }
   });
 
+/**
+ * GET /api/v1/tokens/history
+ * Return recent usage logs for the authenticated user.
+ */
+router.get('/history', authMiddleware, async (req, res) => {
+  const userId = req.user.id;
+  const limit = parseInt(req.query.limit) || 20;
+
+  try {
+    const logs = await prisma.usageLog.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+      take: limit,
+      select: {
+        totalTokens: true,
+        taskType: true,
+        model: true,
+        createdAt: true
+      }
+    });
+
+    const history = logs.map(log => ({
+      amount: Number(log.totalTokens),
+      type: 'consume',
+      category: log.taskType || 'operational',
+      task: log.model,
+      time: log.createdAt.toISOString()
+    }));
+
+    res.json({ history });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch history: ' + err.message });
+  }
+});
+
 module.exports = router;

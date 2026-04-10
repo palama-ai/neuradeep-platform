@@ -1,135 +1,171 @@
 const express = require('express');
-const fs = require('fs');
-const path = require('path');
-const crypto = require('crypto');
+const { PrismaClient } = require('@prisma/client');
 const { authMiddleware } = require('../middleware/auth.middleware');
 
 const router = express.Router();
-const CHAT_STORAGE = path.join(__dirname, '../../chat_history.json');
-
-// Helper to load all chats
-const loadChats = () => {
-  if (fs.existsSync(CHAT_STORAGE)) {
-    try {
-      return JSON.parse(fs.readFileSync(CHAT_STORAGE, 'utf-8'));
-    } catch (e) {
-      return {};
-    }
-  }
-  return {};
-};
-
-// Helper to save chats
-const saveChats = (chats) => {
-  fs.writeFileSync(CHAT_STORAGE, JSON.stringify(chats, null, 2));
-};
+const prisma = new PrismaClient();
 
 /**
  * GET /api/v1/chats
- * List all sessions for the user
+ * List all chat sessions for the authenticated user
  */
-router.get('/', authMiddleware, (req, res) => {
+router.get('/', authMiddleware, async (req, res) => {
   const userId = req.user.id;
-  const chats = loadChats();
-  const userChats = chats[userId] || [];
-  
-  // Return sessions with basic info (id, title, createdAt)
-  const sessions = userChats.map(s => ({
-    id: s.id,
-    title: s.title,
-    createdAt: s.createdAt
-  })).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
-  res.json(sessions);
+  try {
+    const sessions = await prisma.chatSession.findMany({
+      where: { userId },
+      orderBy: { updatedAt: 'desc' },
+      select: {
+        id: true,
+        title: true,
+        createdAt: true,
+        updatedAt: true
+      }
+    });
+
+    res.json(sessions);
+  } catch (err) {
+    console.error('Chat List Error:', err.message);
+    res.status(500).json({ error: 'Failed to list chats' });
+  }
 });
 
 /**
  * POST /api/v1/chats
  * Create a new chat session
  */
-router.post('/', authMiddleware, (req, res) => {
+router.post('/', authMiddleware, async (req, res) => {
   const userId = req.user.id;
   const { title } = req.body;
-  const chats = loadChats();
-  
-  if (!chats[userId]) chats[userId] = [];
-  
-  const newSession = {
-    id: crypto.randomUUID(),
-    title: title || "New Chat",
-    messages: [],
-    createdAt: new Date().toISOString()
-  };
-  
-  chats[userId].push(newSession);
-  saveChats(chats);
-  
-  res.status(201).json(newSession);
+
+  try {
+    const session = await prisma.chatSession.create({
+      data: {
+        userId,
+        title: title || 'New Chat'
+      }
+    });
+
+    res.status(201).json(session);
+  } catch (err) {
+    console.error('Chat Create Error:', err.message);
+    res.status(500).json({ error: 'Failed to create chat' });
+  }
 });
 
 /**
  * GET /api/v1/chats/:id
- * Get full message history for a session
+ * Get full chat session with all messages
  */
-router.get('/:id', authMiddleware, (req, res) => {
+router.get('/:id', authMiddleware, async (req, res) => {
   const userId = req.user.id;
   const sessionId = req.params.id;
-  const chats = loadChats();
-  
-  const session = (chats[userId] || []).find(s => s.id === sessionId);
-  if (!session) return res.status(404).json({ error: "Session not found" });
-  
-  res.json(session);
+
+  try {
+    const session = await prisma.chatSession.findFirst({
+      where: { id: sessionId, userId },
+      include: {
+        messages: {
+          orderBy: { createdAt: 'asc' }
+        }
+      }
+    });
+
+    if (!session) {
+      return res.status(404).json({ error: 'Session not found' });
+    }
+
+    res.json(session);
+  } catch (err) {
+    console.error('Chat Get Error:', err.message);
+    res.status(500).json({ error: 'Failed to load chat' });
+  }
 });
 
 /**
  * POST /api/v1/chats/:id/messages
- * Add a message to a session
+ * Add a message to a chat session
  */
-router.post('/:id/messages', authMiddleware, (req, res) => {
+router.post('/:id/messages', authMiddleware, async (req, res) => {
   const userId = req.user.id;
   const sessionId = req.params.id;
   const { role, content } = req.body;
-  
-  const chats = loadChats();
-  const userSessions = chats[userId] || [];
-  const session = userSessions.find(s => s.id === sessionId);
-  
-  if (!session) return res.status(404).json({ error: "Session not found" });
-  
-  const newMessage = {
-    id: crypto.randomUUID(),
-    role,
-    content,
-    createdAt: new Date().toISOString()
-  };
-  
-  session.messages.push(newMessage);
-  
-  // Auto-update title if it's the first user message
-  if (role === 'user' && (session.title === "New Chat" || session.messages.length === 1)) {
-    session.title = content.substring(0, 30) + (content.length > 30 ? "..." : "");
+
+  if (!role || !content) {
+    return res.status(400).json({ error: 'role and content are required' });
   }
-  
-  saveChats(chats);
-  res.json(newMessage);
+
+  try {
+    // Verify session belongs to user
+    const session = await prisma.chatSession.findFirst({
+      where: { id: sessionId, userId }
+    });
+
+    if (!session) {
+      return res.status(404).json({ error: 'Session not found' });
+    }
+
+    // Create message and update session in a transaction
+    const [message] = await prisma.$transaction([
+      prisma.chatMessage.create({
+        data: {
+          sessionId,
+          role,
+          content
+        }
+      }),
+      // Auto-update title if it's the first user message
+      ...(role === 'user' && session.title === 'New Chat'
+        ? [prisma.chatSession.update({
+            where: { id: sessionId },
+            data: {
+              title: content.substring(0, 30) + (content.length > 30 ? '...' : '')
+            }
+          })]
+        : [prisma.chatSession.update({
+            where: { id: sessionId },
+            data: { updatedAt: new Date() }
+          })]
+      )
+    ]);
+
+    res.json(message);
+  } catch (err) {
+    console.error('Chat Message Error:', err.message);
+    res.status(500).json({ error: 'Failed to add message' });
+  }
 });
 
 /**
  * DELETE /api/v1/chats/:id
- * Delete a session
+ * Delete a chat session and all its messages
  */
-router.delete('/:id', authMiddleware, (req, res) => {
+router.delete('/:id', authMiddleware, async (req, res) => {
   const userId = req.user.id;
   const sessionId = req.params.id;
-  const chats = loadChats();
-  
-  if (chats[userId]) {
-    chats[userId] = chats[userId].filter(s => s.id !== sessionId);
-    saveChats(chats);
+
+  try {
+    // Verify ownership
+    const session = await prisma.chatSession.findFirst({
+      where: { id: sessionId, userId }
+    });
+
+    if (!session) {
+      return res.status(404).json({ error: 'Session not found' });
+    }
+
+    // Delete messages first (cascade), then session
+    await prisma.$transaction([
+      prisma.chatMessage.deleteMany({ where: { sessionId } }),
+      prisma.chatSession.delete({ where: { id: sessionId } })
+    ]);
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Chat Delete Error:', err.message);
+    res.status(500).json({ error: 'Failed to delete chat' });
   }
-  
-  res.json({ success: true });
 });
 
 module.exports = router;
