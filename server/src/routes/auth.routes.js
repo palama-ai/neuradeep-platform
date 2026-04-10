@@ -20,7 +20,12 @@ router.post('/signup', async (req, res) => {
     const passwordHash = await bcrypt.hash(password, 12);
     const user = await prisma.user.create({ data: { email, passwordHash, fullName } });
     res.status(201).json({ accessToken: generateAccessToken(user), user: { id: user.id, email: user.email, role: user.role } });
-  } catch (err) { res.status(500).json({ error: err.message }); }
+  } catch (err) { 
+    if (err.code === 'P2002' && err.meta?.target?.includes('email')) {
+      return res.status(409).json({ error: 'Email already registered. Please login instead.' });
+    }
+    res.status(500).json({ error: 'Signup failed: ' + err.message }); 
+  }
 });
 
 router.post('/login', async (req, res) => {

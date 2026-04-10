@@ -31,3 +31,5 @@ Thumbs.db
 
 # Prisma
 /server/src/generated/prisma
+
+client/src-tauri/binaries/
