@@ -33,6 +33,15 @@ router.post('/completions', authMiddleware, async (req, res) => {
     ]);
 
     if (!user) return res.status(404).json({ error: 'User not found' });
+    
+    // 2. Strict Credit Check
+    if (user.credits < 1) {
+      return res.status(429).json({ 
+        error: 'insufficient_credits',
+        message: 'Your balance is 0. Please share your referral code to get more credits.'
+      });
+    }
+
     if (!apiKeyDoc) return res.status(503).json({ error: `Provider for ${model} is currently unavailable` });
 
     // 3. Forward request to actual LLM
