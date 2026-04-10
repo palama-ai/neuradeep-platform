@@ -19,7 +19,7 @@
       "destination": "/server/src/index.js"
     },
     {
-      "source": "/((?!api/).*)",
+      "source": "/((?!api/|.*\\..*).*)",
       "destination": "/client/index.html"
     }
   ]
