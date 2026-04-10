@@ -30,9 +30,21 @@ async function getMonthlyUsage(userId) {
  */
 const detectProvider = (model) => {
   const m = model.toLowerCase();
-  if (m.includes('groq')) return 'groq';
+  
+  // 1. Explicit Prefixes
+  if (m.startsWith('groq/')) return 'groq';
+  if (m.startsWith('google/') || m.startsWith('gemini/')) return 'gemini';
+  if (m.startsWith('openrouter/')) return 'openrouter';
+
+  // 2. Logic-based Detection
+  // If it contains a slash, it's likely OpenRouter (e.g., "meta-llama/...")
+  if (m.includes('/')) return 'openrouter';
+  
+  // 3. Known ID fragments (Catch-all for direct short IDs)
+  if (m.includes('groq') || m.includes('llama-3') || m.includes('mixtral')) return 'groq';
   if (m.includes('gemini') || m.includes('google')) return 'gemini';
-  return 'openrouter'; // Default
+  
+  return 'openrouter'; // Default catch-all
 };
 
 /**
