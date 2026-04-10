@@ -19,11 +19,20 @@
       "dest": "/server/src/index.js"
     },
     {
-      "handle": "filesystem"
+      "src": "/assets/(.*)",
+      "dest": "/client/assets/$1"
     },
     {
-      "src": "/(.*)",
-      "dest": "/index.html"
+      "src": "/logo.png",
+      "dest": "/client/logo.png"
+    },
+    {
+      "src": "/favicon.ico",
+      "dest": "/client/favicon.ico"
+    },
+    {
+      "src": "/((?!api/).*)",
+      "dest": "/client/index.html"
     }
   ]
 }
