@@ -1,12 +1,14 @@
 // f:/palama-persona-v1/neuradeepai-platform/server/src/routes/proxy.routes.js
 
 const express = require('express');
+const jwt = require('jsonwebtoken');
 const { PrismaClient } = require('@prisma/client');
 const { authMiddleware } = require('../middleware/auth.middleware');
 const { getMonthlyUsage, detectProvider, forwardRequest } = require('../services/llmProxy.service');
 
 const router = express.Router();
 const prisma = new PrismaClient();
+const JWT_SECRET = process.env.JWT_SECRET || 'neuradeep_platform_secret_2026';
 
 /**
  * POST /api/v1/chat/completions
@@ -95,8 +97,10 @@ router.post('/completions', authMiddleware, async (req, res) => {
     res.json(llmResponse);
 
   } catch (err) {
-    console.error('Proxy Error:', err.message);
-    res.status(500).json({ error: 'LLM Error: ' + (err.response?.data?.error?.message || err.message) });
+    console.error('[Proxy Error Details]:', err.response?.data || err.message);
+    const status = err.response?.status || 500;
+    const msg = err.response?.data?.error?.message || err.message;
+    res.status(status).json({ error: `LLM Proxy Error (${status}): ${msg}` });
   }
 });
 
