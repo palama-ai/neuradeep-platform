@@ -50,51 +50,55 @@ router.post('/completions', authMiddleware, async (req, res) => {
     // 3. Forward request to actual LLM
     const llmResponse = await forwardRequest(provider, apiKeyDoc.apiKey, req.body);
 
-    // 4. Log usage and update user atoms
+    // 4. Return LLM response to client IMMEDIATELY for speed
+    res.json(llmResponse);
+
+    // 5. Background Work: Log usage and update user atoms (Async)
     const tokens = llmResponse.usage;
     if (tokens) {
-      // 4.1. Accurately extract input and output tokens, handling both snake_case and camelCase
-      const input_tokens = tokens.prompt_tokens || tokens.promptTokens || 0;
-      const output_tokens = tokens.completion_tokens || tokens.completionTokens || 0;
-      const t_tokens = tokens.total_tokens || tokens.totalTokens || (input_tokens + output_tokens);
+      // Run logging in the background without making the user wait
+      (async () => {
+        try {
+          const input_tokens = tokens.prompt_tokens || tokens.promptTokens || 0;
+          const output_tokens = tokens.completion_tokens || tokens.completionTokens || 0;
+          const t_tokens = tokens.total_tokens || tokens.totalTokens || (input_tokens + output_tokens);
 
-      // 4.2. Calculate fractional cost based on provider (estimation per 1M tokens)
-      const MODEL_PRICES = {
-        'groq': { in: 0.5, out: 0.5 },
-        'gemini': { in: 0.35, out: 1.05 },
-        'openrouter': { in: 1.0, out: 2.0 }
-      };
-      
-      const rates = MODEL_PRICES[provider] || { in: 0, out: 0 };
-      const costUsd = ((input_tokens / 1000000) * rates.in) + ((output_tokens / 1000000) * rates.out);
+          const MODEL_PRICES = {
+            'groq': { in: 0.5, out: 0.5 },
+            'gemini': { in: 0.35, out: 1.05 },
+            'openrouter': { in: 1.0, out: 2.0 }
+          };
+          
+          const rates = MODEL_PRICES[provider] || { in: 0, out: 0 };
+          const costUsd = ((input_tokens / 1000000) * rates.in) + ((output_tokens / 1000000) * rates.out);
 
-      // Atomic usage logging and spend increment
-      await prisma.$transaction([
-        prisma.usageLog.create({
-          data: {
-            userId,
-            model,
-            provider,
-            inputTokens: input_tokens,
-            outputTokens: output_tokens,
-            totalTokens: t_tokens,
-            costUsd: costUsd,
-            taskType: 'chat'
-          }
-        }),
-        prisma.user.update({
-          where: { id: userId },
-          data: { tokensUsedTotal: { increment: BigInt(t_tokens) } }
-        }),
-        prisma.apiKey.update({
-          where: { id: apiKeyDoc.id },
-          data: { currentSpend: { increment: costUsd } }
-        })
-      ]);
+          await prisma.$transaction([
+            prisma.usageLog.create({
+              data: {
+                userId,
+                model,
+                provider,
+                inputTokens: input_tokens,
+                outputTokens: output_tokens,
+                totalTokens: t_tokens,
+                costUsd: costUsd,
+                taskType: 'chat'
+              }
+            }),
+            prisma.user.update({
+              where: { id: userId },
+              data: { tokensUsedTotal: { increment: BigInt(t_tokens) } }
+            }),
+            prisma.apiKey.update({
+              where: { id: apiKeyDoc.id },
+              data: { currentSpend: { increment: costUsd } }
+            })
+          ]);
+        } catch (logErr) {
+          console.error('[Background Logging Error]:', logErr.message);
+        }
+      })();
     }
-
-    // 5. Return LLM response to client
-    res.json(llmResponse);
 
   } catch (err) {
     console.error('[Proxy Error Details]:', err.response?.data || err.message);

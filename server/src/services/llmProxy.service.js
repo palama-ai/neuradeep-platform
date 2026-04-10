@@ -10,10 +10,13 @@ const prisma = new PrismaClient();
  * Calculate usage for the current month on-the-fly
  */
 async function getMonthlyUsage(userId) {
+  if (!userId) return 0;
+  
   const startOfMonth = new Date();
   startOfMonth.setDate(1);
   startOfMonth.setHours(0, 0, 0, 0);
 
+  // Optimization: Simple aggregation on indexed fields
   const usage = await prisma.usageLog.aggregate({
     where: {
       userId,
