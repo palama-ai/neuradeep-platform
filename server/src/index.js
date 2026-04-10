@@ -53,7 +53,13 @@ app.get(/^\/(?!api).*/, (req, res) => {
 });
 
 // ─── Start Server ───
-app.listen(PORT, () => {
-    console.log(`🚀 NeuraDeepAI Server running on port ${PORT}`);
-    console.log(`🔗 Health Check: http://localhost:${PORT}/api/v1/health`);
-});
+// Only listen if not running in a Vercel Serverless environment
+if (process.env.NODE_ENV !== 'production' || process.env.RENDER) {
+    app.listen(PORT, () => {
+        console.log(`🚀 NeuraDeepAI Server running on port ${PORT}`);
+        console.log(`🔗 Health Check: http://localhost:${PORT}/api/v1/health`);
+    });
+}
+
+// Export for Vercel
+module.exports = app;

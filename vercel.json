@@ -1,6 +1,5 @@
 {
   "version": 2,
-  "name": "neuradeepai-platform",
   "builds": [
     {
       "src": "server/src/index.js",
@@ -9,17 +8,15 @@
     {
       "src": "client/package.json",
       "use": "@vercel/static-build",
-      "config": { "distDir": "dist" }
+      "config": {
+        "distDir": "dist"
+      }
     }
   ],
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "server/src/index.js"
-    },
-    {
-      "source": "/(auth|dashboard|settings|admin)(.*)",
-      "destination": "client/index.html"
+      "destination": "/server/src/index.js"
     },
     {
       "source": "/(.*)",
