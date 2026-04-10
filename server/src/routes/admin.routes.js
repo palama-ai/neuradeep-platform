@@ -25,7 +25,8 @@ router.get('/users', async (req, res) => {
         fullName: true,
         role: true,
         plan: true,
-        tokensUsedTotal: true,
+        credits: true,
+        creditsConsumed: true,
         isActive: true,
         createdAt: true
       },
@@ -34,7 +35,7 @@ router.get('/users', async (req, res) => {
 
     const formattedUsers = users.map(u => ({
       ...u,
-      tokensUsedTotal: u.tokensUsedTotal.toString()
+      creditsConsumed: u.creditsConsumed?.toString() || '0'
     }));
 
     res.json(formattedUsers);
@@ -48,7 +49,7 @@ router.get('/users', async (req, res) => {
  * Update user plan, role or status
  */
 router.put('/users/:id', async (req, res) => {
-  const { plan, role, isActive, tokensLimitMonthly } = req.body;
+    const { plan, role, isActive, planCreditsMonthly } = req.body;
   try {
     const updated = await prisma.user.update({
       where: { id: req.params.id },
@@ -56,7 +57,7 @@ router.put('/users/:id', async (req, res) => {
         plan, 
         role, 
         isActive, 
-        tokensLimitMonthly: tokensLimitMonthly ? BigInt(tokensLimitMonthly) : undefined 
+        planCreditsMonthly: planCreditsMonthly ? parseInt(planCreditsMonthly) : undefined 
       }
     });
     res.json({ message: 'User updated successfully', userId: updated.id });

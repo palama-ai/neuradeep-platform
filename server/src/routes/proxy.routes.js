@@ -35,35 +35,20 @@ router.post('/completions', authMiddleware, async (req, res) => {
     if (!user) return res.status(404).json({ error: 'User not found' });
     if (!apiKeyDoc) return res.status(503).json({ error: `Provider for ${model} is currently unavailable` });
 
-    // 2. Simplified/Optimized Quota Check
-    // Skip expensive monthly aggregation if the total usage is already well below the limit
-    if (BigInt(user.tokensUsedTotal) > user.tokensLimitMonthly) {
-       const currentUsage = await getMonthlyUsage(userId);
-       if (BigInt(currentUsage) >= user.tokensLimitMonthly) {
-          return res.status(429).json({
-            error: 'Monthly token limit exceeded',
-            usage: currentUsage,
-            limit: user.tokensLimitMonthly.toString()
-          });
-       }
-    }
-
     // 3. Forward request to actual LLM
     const llmResponse = await forwardRequest(provider, apiKeyDoc.apiKey, req.body);
 
-    // 4. Return LLM response to client IMMEDIATELY for speed
+    // 4. Return LLM response to client
     res.json(llmResponse);
 
-    // 5. Background Work: Log usage and update user atoms (Async)
+    // 5. Background Work: Update API Key spend stats only
     const tokens = llmResponse.usage;
     if (tokens) {
-      // Run logging in the background without making the user wait
       (async () => {
         try {
           const input_tokens = tokens.prompt_tokens || tokens.promptTokens || 0;
           const output_tokens = tokens.completion_tokens || tokens.completionTokens || 0;
-          const t_tokens = tokens.total_tokens || tokens.totalTokens || (input_tokens + output_tokens);
-
+          
           const MODEL_PRICES = {
             'groq': { in: 0.5, out: 0.5 },
             'gemini': { in: 0.35, out: 1.05 },
@@ -73,30 +58,12 @@ router.post('/completions', authMiddleware, async (req, res) => {
           const rates = MODEL_PRICES[provider] || { in: 0, out: 0 };
           const costUsd = ((input_tokens / 1000000) * rates.in) + ((output_tokens / 1000000) * rates.out);
 
-          await prisma.$transaction([
-            prisma.usageLog.create({
-              data: {
-                userId,
-                model,
-                provider,
-                inputTokens: input_tokens,
-                outputTokens: output_tokens,
-                totalTokens: t_tokens,
-                costUsd: costUsd,
-                taskType: 'chat'
-              }
-            }),
-            prisma.user.update({
-              where: { id: userId },
-              data: { tokensUsedTotal: { increment: BigInt(t_tokens) } }
-            }),
-            prisma.apiKey.update({
-              where: { id: apiKeyDoc.id },
-              data: { currentSpend: { increment: costUsd } }
-            })
-          ]);
+          await prisma.apiKey.update({
+            where: { id: apiKeyDoc.id },
+            data: { currentSpend: { increment: costUsd } }
+          });
         } catch (logErr) {
-          console.error('[Background Logging Error]:', logErr.message);
+          console.error('[Background Spend Update Error]:', logErr.message);
         }
       })();
     }

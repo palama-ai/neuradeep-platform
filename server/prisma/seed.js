@@ -23,7 +23,9 @@ async function main() {
       fullName: 'Master Admin',
       role: 'admin',
       plan: 'enterprise',
-      tokensLimitMonthly: 999999999,
+      planCreditsMonthly: 999999,
+      credits: 999999,
+      creditsTotal: 999999,
     },
   });
   console.log(`✅ Created Admin: ${admin.email}`);
@@ -37,7 +39,9 @@ async function main() {
       fullName: 'Test User',
       role: 'user',
       plan: 'free',
-      tokensLimitMonthly: 100000,
+      planCreditsMonthly: 0,
+      credits: 500,
+      creditsTotal: 500,
     },
   });
   console.log(`✅ Created User: ${user.email}`);

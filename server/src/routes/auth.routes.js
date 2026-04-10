@@ -4,6 +4,7 @@ const { PrismaClient } = require('@prisma/client');
 const { generateAccessToken } = require('../utils/auth');
 const { authMiddleware } = require('../middleware/auth.middleware');
 const { uploadAvatar } = require('../services/cloudinary.service');
+const crypto = require('crypto');
 const router = express.Router();
 const prisma = new PrismaClient();
 
@@ -15,15 +16,119 @@ const serializeUser = (user) => {
 };
 
 router.post('/signup', async (req, res) => {
-  const { email, password, fullName } = req.body;
+  const { email, password, fullName, referralCode: appliedCode } = req.body;
+  const referralCodeQuery = req.query.ref;
+  const finalAppliedCode = appliedCode || referralCodeQuery;
+
   try {
     const passwordHash = await bcrypt.hash(password, 12);
-    const user = await prisma.user.create({ data: { email, passwordHash, fullName } });
-    res.status(201).json({ accessToken: generateAccessToken(user), user: { id: user.id, email: user.email, role: user.role } });
+    
+    // 1. Generate branded referral code for new user
+    const userReferralCode = "PALM-" + crypto.randomBytes(3).toString('hex').toUpperCase();
+
+    // 2. Create the user within a transaction to handle referral bonus
+    const result = await prisma.$transaction(async (tx) => {
+      const newUser = await tx.user.create({ 
+        data: { 
+          email, 
+          passwordHash, 
+          fullName,
+          referralCode: userReferralCode,
+          credits: 500,        // Starting bonus
+          creditsTotal: 500
+        } 
+      });
+
+      // 3. Handle Referral Bonus if code provided
+      if (finalAppliedCode) {
+        const referrer = await tx.user.findUnique({
+          where: { referralCode: finalAppliedCode }
+        });
+
+        if (referrer && referrer.id !== newUser.id) {
+          // Bonus to referrer
+          const updatedReferrer = await tx.user.update({
+            where: { id: referrer.id },
+            data: {
+              credits: { increment: 500 },
+              creditsTotal: { increment: 500 },
+              referralCount: { increment: 1 },
+              referralEarnings: { increment: 500 },
+            }
+          });
+
+          // Extra bonus to new user (Referee)
+          const updatedReferee = await tx.user.update({
+            where: { id: newUser.id },
+            data: {
+              credits: { increment: 500 },
+              creditsTotal: { increment: 1000 }, // 500 signup + 500 ref
+              referredBy: finalAppliedCode,
+            }
+          });
+
+          // Record the referral
+          await tx.referral.create({
+            data: {
+              referrerId: referrer.id,
+              refereeId: newUser.id,
+              creditsAwarded: 500
+            }
+          });
+
+          // Logs
+          await tx.creditLog.create({
+            data: {
+              userId: referrer.id,
+              amount: 500,
+              type: 'referral_bonus',
+              description: `Referral bonus: ${email} joined via your link`,
+              balanceAfter: updatedReferrer.credits
+            }
+          });
+
+          await tx.creditLog.create({
+            data: {
+              userId: newUser.id,
+              amount: 500,
+              type: 'referral_bonus',
+              description: `Ref bonus: joined via referral from ${referrer.email}`,
+              balanceAfter: updatedReferee.credits
+            }
+          });
+
+          return { user: updatedReferee, bonusApplied: true };
+        }
+      }
+
+      // Initial signup log
+      await tx.creditLog.create({
+        data: {
+          userId: newUser.id,
+          amount: 500,
+          type: 'signup_bonus',
+          description: 'Welcome bonus for joining Palama Persona',
+          balanceAfter: 500
+        }
+      });
+
+      return { user: newUser, bonusApplied: false };
+    });
+
+    res.status(201).json({ 
+      accessToken: generateAccessToken(result.user), 
+      user: { 
+        id: result.user.id, 
+        email: result.user.email, 
+        role: result.user.role,
+        bonusApplied: result.bonusApplied
+      } 
+    });
   } catch (err) { 
     if (err.code === 'P2002' && err.meta?.target?.includes('email')) {
       return res.status(409).json({ error: 'Email already registered. Please login instead.' });
     }
+    console.error('[Signup Error]:', err);
     res.status(500).json({ error: 'Signup failed: ' + err.message }); 
   }
 });
@@ -70,8 +175,12 @@ router.get('/me', authMiddleware, async (req, res) => {
         profileImage: true,
         role: true,
         plan: true,
-        tokensLimitMonthly: true,
-        tokensUsedTotal: true,
+        credits: true,
+        creditsTotal: true,
+        creditsConsumed: true,
+        referralCode: true,
+        referralCount: true,
+        referralEarnings: true,
         isActive: true,
         createdAt: true
       }

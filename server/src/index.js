@@ -28,10 +28,11 @@ app.get('/api/v1/health', (req, res) => {
 app.use('/api/v1/auth', require('./routes/auth.routes'));
 app.use('/api/v1/chat', require('./routes/proxy.routes'));
 app.use('/api/v1/admin', require('./routes/admin.routes'));
-app.use('/api/v1/tokens', require('./routes/token.routes'));
 app.use('/api/v1/config', require('./routes/config.routes'));
 app.use('/api/v1/admin/config', require('./routes/config.routes'));
 app.use('/api/v1/chats', require('./routes/chat.routes'));
+app.use('/api/v1/credits', require('./routes/credit.routes'));
+app.use('/api/v1/referral', require('./routes/referral.routes'));
 
 // ─── Serve React SPA ───
 const clientPath = path.join(__dirname, '../../client/dist');
