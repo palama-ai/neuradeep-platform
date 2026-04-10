@@ -24,10 +24,11 @@ router.post('/completions', authMiddleware, async (req, res) => {
 
   try {
     // 1. Parallelize user profile and API key lookup for speed
+    const provider = detectProvider(model);
     const [user, apiKeyDoc] = await Promise.all([
       prisma.user.findUnique({ where: { id: userId } }),
       prisma.apiKey.findFirst({
-        where: { provider: detectProvider(model), isActive: true }
+        where: { provider, isActive: true }
       })
     ]);
 
