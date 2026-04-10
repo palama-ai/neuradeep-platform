@@ -155,7 +155,7 @@ router.post('/login', async (req, res) => {
     res.json({ 
       accessToken, 
       redirectUrl,
-      user: { id: user.id, email: user.email, role: user.role } 
+      user: { id: user.id, email: user.email, role: user.role, profileImage: user.profileImage } 
     });
   } catch (err) { 
     res.status(500).json({ error: err.message }); 

@@ -30,20 +30,28 @@ async function uploadAvatar(base64Data, userId) {
     imageData = `data:image/webp;base64,${imageData}`;
   }
 
-  const result = await cloudinary.uploader.upload(imageData, {
-    folder: 'palama/avatars',
-    public_id: `user_${userId}`,
-    overwrite: true,
-    transformation: [
-      { width: 256, height: 256, crop: 'fill', gravity: 'face' },
-      { quality: 'auto', fetch_format: 'auto' }
-    ]
-  });
+  try {
+    const result = await cloudinary.uploader.upload(imageData, {
+      folder: 'palama/avatars',
+      public_id: `user_${userId}`,
+      overwrite: true,
+      invalidate: true, // Force CDN refresh
+      transformation: [
+        { width: 256, height: 256, crop: 'fill', gravity: 'face' },
+        { quality: 'auto', fetch_format: 'auto' }
+      ]
+    });
 
-  return {
-    url: result.secure_url,
-    publicId: result.public_id
-  };
+    console.log(`[Cloudinary] Successfully uploaded avatar for ${userId}: ${result.secure_url}`);
+
+    return {
+      url: result.secure_url,
+      publicId: result.public_id
+    };
+  } catch (err) {
+    console.error(`[Cloudinary] Upload failed for ${userId}:`, err.message);
+    throw err;
+  }
 }
 
 /**
