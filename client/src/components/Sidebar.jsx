@@ -39,8 +39,8 @@ const Sidebar = () => {
         </div>
       </div>
 
-      <nav className="flex-1 px-4 space-y-2">
-        <div className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-4 px-4">
+      <nav className="flex-1 px-4 space-y-2 overflow-y-auto custom-scrollbar">
+        <div className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-4 px-4 sticky top-0 bg-sidebar py-2 z-10">
           Main Menu
         </div>
         <SidebarItem to="/dashboard" icon={LayoutDashboard} label="Overview" />
@@ -51,7 +51,7 @@ const Sidebar = () => {
         <SidebarItem to="/dashboard/feedbacks" icon={MessageSquare} label="Feedbacks" />
       </nav>
 
-      <div className="p-4 space-y-4">
+      <div className="p-4 mt-auto space-y-4 border-t border-[var(--border)] bg-sidebar">
         <div className="bg-surface rounded-2xl p-4 border border-[var(--border)]">
           <div className="flex items-center gap-3 mb-3">
             <div className="w-10 h-10 rounded-full bg-[var(--surface-hover)] flex items-center justify-center text-white font-bold border border-[var(--border)]">

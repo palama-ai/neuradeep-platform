@@ -37,9 +37,12 @@ const DashboardLayout = () => (
 
 // Secure Admin Guard
 const AdminGuard = ({ children }) => {
-  const { user, token } = useAuthStore();
+  const { user, token, logout } = useAuthStore();
+  
   if (!token || user?.role !== 'admin') {
-    return <Navigate to="/auth/login" />;
+    // SECURITY: If they shouldn't be here, clear the session
+    if (token) logout();
+    return <Navigate to="/auth/login" replace />;
   }
   return children;
 };
