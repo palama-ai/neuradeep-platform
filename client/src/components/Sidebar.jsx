@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Users, Key, BarChart3, Settings, LogOut, Zap, Cpu } from 'lucide-react';
+import { LayoutDashboard, Users, Key, BarChart3, Settings, LogOut, Zap, Cpu, MessageSquare } from 'lucide-react';
 import useAuthStore from '../store/useAuthStore';
 
 const SidebarItem = ({ to, icon: Icon, label }) => (
