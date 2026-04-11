@@ -1,5 +1,3 @@
-// f:/palama-persona-v1/neuradeepai-platform/server/prisma/schema.prisma
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,106 +8,84 @@ datasource db {
 }
 
 model User {
-  id                 String     @id @default(uuid())
-  email              String     @unique
+  id                 String        @id @default(uuid())
+  email              String        @unique
   passwordHash       String
   fullName           String?
   profileImage       String?
-  role               String     @default("user") // "user" | "admin"
-  plan               String     @default("free") // "free" | "pro" | "enterprise"
-  
-  // ═══ CREDIT SYSTEM ═══
-  credits             Int       @default(500)      // Current balance
-  creditsTotal        Int       @default(500)      // Total ever received
-  creditsConsumed     Int       @default(0)        // Total ever consumed
-  
-  // ═══ REFERRAL SYSTEM ═══
-  referralCode        String    @unique @default(uuid())  // Branded PALM-XXXXXX
-  referredBy          String?   // referralCode of who referred this user
-  referralCount       Int       @default(0)        // How many people referred
-  referralEarnings    Int       @default(0)        // Total credits earned from referrals
-  
-  // ═══ PLAN LIMITS ═══
-  planCreditsMonthly  Int       @default(0)        // Monthly credit allowance
-  planResetDate       DateTime?                     // When monthly credits reset
-  
-  isActive           Boolean    @default(true)
-  lastFeedbackAt     DateTime?                     // Track last time user got feedback credits
-  createdAt          DateTime   @default(now())
-  updatedAt          DateTime   @updatedAt
-  
-  // Relations
+  role               String        @default("user")
+  plan               String        @default("free")
+  credits            Int           @default(500)
+  creditsTotal       Int           @default(500)
+  creditsConsumed    Int           @default(0)
+  referralCode       String        @unique @default(uuid())
+  referredBy         String?
+  referralCount      Int           @default(0)
+  referralEarnings   Int           @default(0)
+  planCreditsMonthly Int           @default(0)
+  planResetDate      DateTime?
+  isActive           Boolean       @default(true)
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+  lastFeedbackAt     DateTime?
+  chatSessions       ChatSession[]
+  creditLogs         CreditLog[]
+  feedbacks          Feedback[]
+  referredByRef      Referral?     @relation("Referee")
+  referrals          Referral[]    @relation("Referrer")
   sessions           Session[]
   usageLogs          UsageLog[]
-  creditLogs          CreditLog[]
-  referrals           Referral[]   @relation("Referrer")
-  referredByRef       Referral?    @relation("Referee")
-  chatSessions       ChatSession[]
-  feedbacks          Feedback[]
 }
 
-// New model: Credit transaction log
 model CreditLog {
-  id          BigInt   @id @default(autoincrement())
-  userId      String
-  user        User     @relation(fields: [userId], references: [id])
-  
-  amount      Int                    // Positive = earned, Negative = consumed
-  type        String                 // "consume" | "referral_bonus" | "signup_bonus" | "plan_credit" | "refund"
-  
-  // Consumption details (only for type="consume")
-  model       String?                // AI model used
-  provider    String?                // openrouter | groq | gemini
-  inputTokens Int?
+  id           BigInt   @id @default(autoincrement())
+  userId       String
+  amount       Int
+  type         String
+  model        String?
+  provider     String?
+  inputTokens  Int?
   outputTokens Int?
-  multiplier  Float?                 // Model multiplier applied
-  taskType    String?                // "vision" | "thinking" | "planning" | "grounding"
-  
-  // Context
-  description String?                // Human-readable description
-  balanceAfter Int                   // Balance after this transaction
-  
-  createdAt   DateTime @default(now())
-  
+  multiplier   Float?
+  taskType     String?
+  description  String?
+  balanceAfter Int
+  createdAt    DateTime @default(now())
+  user         User     @relation(fields: [userId], references: [id])
+
   @@index([userId, createdAt])
   @@index([userId, type])
   @@index([createdAt])
 }
 
-// New model: Referral tracking
 model Referral {
-  id          String   @id @default(uuid())
-  
-  referrerId  String                 // User who shared the link
-  referrer    User     @relation("Referrer", fields: [referrerId], references: [id])
-  
-  refereeId   String   @unique       // User who signed up via link
-  referee     User     @relation("Referee", fields: [refereeId], references: [id])
-  
-  creditsAwarded Int   @default(500) // Credits given to each party
-  status      String   @default("completed") // "completed" | "pending"
-  
-  createdAt   DateTime @default(now())
-  
+  id             String   @id @default(uuid())
+  referrerId     String
+  refereeId      String   @unique
+  creditsAwarded Int      @default(500)
+  status         String   @default("completed")
+  createdAt      DateTime @default(now())
+  referee        User     @relation("Referee", fields: [refereeId], references: [id])
+  referrer       User     @relation("Referrer", fields: [referrerId], references: [id])
+
   @@index([referrerId])
 }
 
 model ApiKey {
-  id           String   @id @default(uuid())
-  provider     String   // "openrouter" | "groq" | "gemini"
-  apiKey       String   // Encrypted
-  isActive     Boolean  @default(true)
+  id            String   @id @default(uuid())
+  provider      String
+  apiKey        String
+  isActive      Boolean  @default(true)
   monthlyBudget Decimal? @default(0)
   currentSpend  Decimal  @default(0)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  updatedById  String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  updatedById   String?
 }
 
 model UsageLog {
   id           BigInt   @id @default(autoincrement())
   userId       String
-  user         User     @relation(fields: [userId], references: [id])
   model        String
   provider     String
   inputTokens  Int
@@ -118,6 +94,7 @@ model UsageLog {
   costUsd      Decimal
   taskType     String?
   createdAt    DateTime @default(now())
+  user         User     @relation(fields: [userId], references: [id])
 
   @@index([userId, createdAt])
   @@index([createdAt])
@@ -125,47 +102,47 @@ model UsageLog {
 }
 
 model Session {
-  id         String   @id @default(uuid())
-  userId     String
-  user       User     @relation(fields: [userId], references: [id])
-  token      String   @unique
-  expiresAt  DateTime
-  createdAt  DateTime @default(now())
+  id        String   @id @default(uuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
 }
 
 model GlobalConfig {
   id        String   @id @default(uuid())
-  key       String   @unique // e.g. "THINKING_MODEL"
-  value     String   // e.g. "groq:deepseek-r1-distill-llama-70b"
+  key       String   @unique
+  value     String
   updatedAt DateTime @updatedAt
 }
 
 model ChatSession {
   id        String        @id @default(uuid())
   userId    String
-  user      User          @relation(fields: [userId], references: [id])
   title     String?       @default("New Chat")
-  messages  ChatMessage[]
   createdAt DateTime      @default(now())
   updatedAt DateTime      @updatedAt
+  messages  ChatMessage[]
+  user      User          @relation(fields: [userId], references: [id])
 }
 
 model ChatMessage {
   id        String      @id @default(uuid())
   sessionId String
-  session   ChatSession @relation(fields: [sessionId], references: [id])
-  role      String      // "user" | "agent" | "system"
-  content   String      @db.Text
+  role      String
+  content   String
   createdAt DateTime    @default(now())
+  session   ChatSession @relation(fields: [sessionId], references: [id])
 }
 
 model Feedback {
   id        String   @id @default(uuid())
   userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  rating    Int      //  star rating 1-5
-  comment   String?  @db.Text
+  rating    Int
+  comment   String?
   createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
 
   @@index([userId])
 }

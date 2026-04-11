@@ -138,6 +138,40 @@ router.post('/:id/messages', authMiddleware, async (req, res) => {
 });
 
 /**
+ * PATCH /api/v1/chats/:id
+ * Rename a chat session
+ */
+router.patch('/:id', authMiddleware, async (req, res) => {
+  const userId = req.user.id;
+  const sessionId = req.params.id;
+  const { title } = req.body;
+
+  if (!title) {
+    return res.status(400).json({ error: 'title is required' });
+  }
+
+  try {
+    const session = await prisma.chatSession.findFirst({
+      where: { id: sessionId, userId }
+    });
+
+    if (!session) {
+      return res.status(404).json({ error: 'Session not found' });
+    }
+
+    const updated = await prisma.chatSession.update({
+      where: { id: sessionId },
+      data: { title }
+    });
+
+    res.json(updated);
+  } catch (err) {
+    console.error('Chat Rename Error:', err.message);
+    res.status(500).json({ error: 'Failed to rename chat' });
+  }
+});
+
+/**
  * DELETE /api/v1/chats/:id
  * Delete a chat session and all its messages
  */
