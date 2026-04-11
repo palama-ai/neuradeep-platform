@@ -99,7 +99,7 @@ const DashboardOverview = () => {
     { label: 'Platform Users', value: summary.totalUsers.toLocaleString(), change: '+12%', color: 'blue' },
     { label: 'Total Tokens', value: summary.totalTokens.toLocaleString(), change: '+8%', color: 'indigo' },
     { label: 'Active Keys', value: summary.activeKeys, change: 'Stable', color: 'emerald' },
-    { label: 'Avg Rating', value: summary.averageRating + ' ⭐', change: `${summary.totalFeedbacks} reviews`, color: 'amber' }
+    { label: 'Avg Rating', value: summary.averageRating, change: `${summary.totalFeedbacks} reviews`, color: 'amber' }
   ];
 
   return (
