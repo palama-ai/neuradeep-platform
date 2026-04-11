@@ -133,6 +133,20 @@ router.post('/consume', authMiddleware, async (req, res) => {
         }
       });
 
+      // 📊 POPULATE USAGE LOG: Necessary for Admin Dashboard aggregation
+      await tx.usageLog.create({
+        data: {
+          userId: req.user.id,
+          model: model,
+          provider: detectProvider(model),
+          inputTokens: inputTokens,
+          outputTokens: outputTokens,
+          totalTokens: inputTokens + outputTokens,
+          costUsd: 0, // Simplified for now
+          taskType: taskType
+        }
+      });
+
       return { success: true, consumed: cost, balance: updatedUser.credits };
     });
 
