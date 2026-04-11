@@ -134,10 +134,18 @@ router.get('/summary', async (req, res) => {
       _sum: { totalTokens: true }
     });
 
+    // Feedback stats
+    const feedbackStats = await prisma.feedback.aggregate({
+      _avg: { rating: true },
+      _count: true
+    });
+
     res.json({
       totalUsers: userCount,
       activeKeys: keyCount,
       totalTokens: usage._sum.totalTokens || 0,
+      totalFeedbacks: feedbackStats._count || 0,
+      averageRating: feedbackStats._avg.rating ? Number(feedbackStats._avg.rating.toFixed(1)) : 0,
       successRate: '99.9%' // Placeholder for now
     });
   } catch (err) {
@@ -176,6 +184,30 @@ router.get('/analytics', async (req, res) => {
     res.json(chartData);
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch analytics' });
+  }
+});
+
+/**
+ * GET /api/v1/admin/feedbacks
+ * Returns a list of all user feedbacks with user info
+ */
+router.get('/feedbacks', async (req, res) => {
+  try {
+    const feedbacks = await prisma.feedback.findMany({
+      include: {
+        user: {
+          select: {
+            email: true,
+            fullName: true
+          }
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+    res.json(feedbacks);
+  } catch (err) {
+    console.error('[Admin Feedback Error]:', err);
+    res.status(500).json({ error: 'Failed to fetch feedbacks' });
   }
 });
 

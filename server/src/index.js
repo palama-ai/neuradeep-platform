@@ -33,6 +33,7 @@ app.use('/api/v1/admin/config', require('./routes/config.routes'));
 app.use('/api/v1/chats', require('./routes/chat.routes'));
 app.use('/api/v1/credits', require('./routes/credit.routes'));
 app.use('/api/v1/referral', require('./routes/referral.routes'));
+app.use('/api/v1/feedback', require('./routes/feedback.routes'));
 
 // ─── Serve React SPA ───
 const clientPath = path.join(__dirname, '../../client/dist');

@@ -17,6 +17,7 @@ import UsersPage from './pages/UsersPage';
 import KeysPage from './pages/KeysPage';
 import AnalyticsPage from './pages/AnalyticsPage';
 import ConfigPage from './pages/ConfigPage';
+import FeedbacksPage from './pages/FeedbacksPage';
 
 // Layout Components
 const AuthLayout = () => (
@@ -98,7 +99,7 @@ const DashboardOverview = () => {
     { label: 'Platform Users', value: summary.totalUsers.toLocaleString(), change: '+12%', color: 'blue' },
     { label: 'Total Tokens', value: summary.totalTokens.toLocaleString(), change: '+8%', color: 'indigo' },
     { label: 'Active Keys', value: summary.activeKeys, change: 'Stable', color: 'emerald' },
-    { label: 'System Uptime', value: summary.successRate, change: '+0.1%', color: 'amber' }
+    { label: 'Avg Rating', value: summary.averageRating + ' ⭐', change: `${summary.totalFeedbacks} reviews`, color: 'amber' }
   ];
 
   return (
@@ -243,6 +244,7 @@ function App() {
           <Route path="keys" element={<KeysPage />} />
           <Route path="models" element={<ConfigPage />} />
           <Route path="analytics" element={<AnalyticsPage />} />
+          <Route path="feedbacks" element={<FeedbacksPage />} />
           <Route path="settings" element={<div className="p-8 glass rounded-[2.5rem]">General settings module coming soon.</div>} />
         </Route>
 

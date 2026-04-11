@@ -48,6 +48,7 @@ const Sidebar = () => {
         <SidebarItem to="/dashboard/keys" icon={Key} label="API Keys" />
         <SidebarItem to="/dashboard/models" icon={Cpu} label="Models" />
         <SidebarItem to="/dashboard/analytics" icon={BarChart3} label="Analytics" />
+        <SidebarItem to="/dashboard/feedbacks" icon={MessageSquare} label="Feedbacks" />
       </nav>
 
       <div className="p-4 space-y-4">

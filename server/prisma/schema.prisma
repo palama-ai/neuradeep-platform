@@ -34,6 +34,7 @@ model User {
   planResetDate       DateTime?                     // When monthly credits reset
   
   isActive           Boolean    @default(true)
+  lastFeedbackAt     DateTime?                     // Track last time user got feedback credits
   createdAt          DateTime   @default(now())
   updatedAt          DateTime   @updatedAt
   
@@ -44,6 +45,7 @@ model User {
   referrals           Referral[]   @relation("Referrer")
   referredByRef       Referral?    @relation("Referee")
   chatSessions       ChatSession[]
+  feedbacks          Feedback[]
 }
 
 // New model: Credit transaction log
@@ -155,4 +157,15 @@ model ChatMessage {
   role      String      // "user" | "agent" | "system"
   content   String      @db.Text
   createdAt DateTime    @default(now())
+}
+
+model Feedback {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  rating    Int      //  star rating 1-5
+  comment   String?  @db.Text
+  createdAt DateTime @default(now())
+
+  @@index([userId])
 }
