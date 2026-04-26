@@ -15,6 +15,7 @@ app.use(cors({
         
         const allowedOrigins = [
             'https://neuradeepai.com',
+            'https://neuradeep-platform3.vercel.app',
             'http://localhost:5173',
             'http://localhost:5001',
             'http://localhost:3000',
