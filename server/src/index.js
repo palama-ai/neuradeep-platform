@@ -34,7 +34,8 @@ app.use(cors({
         }
 
         // For Oracle Cloud / Dynamic Domains
-        if (origin.includes('.duckdns.org') || origin.startsWith('http://84.8.219.101')) {
+        console.log(`[CORS Check] Origin: ${origin}`);
+        if (origin.includes('84.8.219.101') || origin.includes('duckdns.org')) {
             return callback(null, true);
         }
 
