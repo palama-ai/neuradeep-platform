@@ -147,9 +147,16 @@ router.post('/login', async (req, res) => {
     let redirectUrl = null;
 
     if (callback) {
-      const url = new URL(callback);
-      url.searchParams.set('token', accessToken);
-      redirectUrl = url.toString();
+      try {
+        const url = new URL(callback);
+        url.searchParams.set('token', accessToken);
+        redirectUrl = url.toString();
+      } catch (urlErr) {
+        // Fallback for non-standard URLs or IPs
+        redirectUrl = callback.includes('?') 
+          ? `${callback}&token=${accessToken}` 
+          : `${callback}?token=${accessToken}`;
+      }
     }
 
     res.json({ 
