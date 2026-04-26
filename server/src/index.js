@@ -33,8 +33,8 @@ app.use(cors({
              return callback(null, true);
         }
 
-        // For Oracle Cloud, if they connect directly via IP
-        if (process.env.CLOUD_IP && origin.startsWith(`http://${process.env.CLOUD_IP}:`)) {
+        // For Oracle Cloud / Dynamic Domains
+        if (origin.includes('.duckdns.org') || origin.startsWith('http://84.8.219.101')) {
             return callback(null, true);
         }
 
