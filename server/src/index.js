@@ -9,13 +9,37 @@ const PORT = process.env.PORT || 5000;
 // ─── Middleware ───
 app.use(express.json({ limit: '10mb' }));
 app.use(cors({
-    origin: [
-        'https://neuradeepai.com',
-        'http://localhost:5173', // Vite default dev port
-        'http://localhost:5001', // Palama Agent Flask backend
-        'http://localhost:3000', // Dev React
-        'palama://'  // Desktop app custom protocol
-    ],
+    origin: function(origin, callback) {
+        // Allow requests with no origin (like mobile apps or curl requests)
+        if (!origin) return callback(null, true);
+        
+        const allowedOrigins = [
+            'https://neuradeepai.com',
+            'http://localhost:5173',
+            'http://localhost:5001',
+            'http://localhost:3000',
+            'palama://'
+        ];
+        
+        // Allow dynamic cloud IPs or custom domains (e.g. any port on localhost or specific cloud IP)
+        // In production, we should tighten this, but for Oracle Cloud dynamic ports we allow based on ENV
+        const extraOrigins = process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : [];
+        if (allowedOrigins.includes(origin) || extraOrigins.includes(origin)) {
+            return callback(null, true);
+        }
+        
+        // Also allow dynamic ports on localhost for dev/testing cloud locally
+        if (origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:')) {
+             return callback(null, true);
+        }
+
+        // For Oracle Cloud, if they connect directly via IP
+        if (process.env.CLOUD_IP && origin.startsWith(`http://${process.env.CLOUD_IP}:`)) {
+            return callback(null, true);
+        }
+
+        callback(new Error('Not allowed by CORS'));
+    },
     credentials: true
 }));
 

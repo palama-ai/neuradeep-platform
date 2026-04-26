@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 const { authMiddleware } = require('../middleware/auth.middleware');
 
 // ═══════════════════════════════════════════════════
-// MODEL PRICING CONFIGURATION
+// NEW CREDIT PRICING MODEL
 // ═══════════════════════════════════════════════════
 const INPUT_RATE = 3;    // bits per 1K input tokens
 const OUTPUT_RATE = 6;   // bits per 1K output tokens
@@ -13,15 +13,12 @@ const MIN_CHARGE = 1;    // minimum 1 bit per call
 
 const MODEL_MULTIPLIERS = {
   'qwen/qwen3-vl-235b-a22b-instruct': 1.0,
-  'qwen/qwen3-vl-235b-a22b-thinking': 1.0,
-  'meta-llama/llama-4-scout-17b-16e-instruct': 0.8,
-  'openai/gpt-4o-mini': 1.5,
-  'openai/gpt-oss-120b': 2.0,
-  'openai/gpt-oss-120b:exacto': 2.0,
-  'anthropic/claude-sonnet-4': 2.5,
-  'moonshotai/kimi-k2-instruct-0905': 1.2,
-  'llama-3.3-70b-versatile': 1.0,
-  'qwen/qwen3-32b': 1.0,
+  'qwen/qwen3.5-flash': 1.0, // Core model: 1k tokens = 1 credit
+  'qwen/qwen3.5-flash-02-23': 1.0,
+  'groq:deepseek-r1-distill-llama-70b': 1.2,
+  'openai/gpt-4o-mini': 1.0,
+  'anthropic/claude-3-haiku': 1.0,
+  'anthropic/claude-3.5-sonnet': 3.0,
 };
 
 function getMultiplier(model) {
@@ -83,14 +80,24 @@ router.get('/balance', authMiddleware, async (req, res) => {
 
 // ═══════════════════════════════════════════════════
 // POST /api/v1/credits/consume
-// ═══════════════════════════════════════════════════
 router.post('/consume', authMiddleware, async (req, res) => {
   const { inputTokens = 0, outputTokens = 0, model = 'unknown', 
           taskType = 'general', description = '' } = req.body;
 
   try {
-    const cost = calculateCredits(inputTokens, outputTokens, model);
-    const multiplier = getMultiplier(model);
+    let cost = 0;
+    
+    // Voice Mode Specific Billing
+    if (taskType === 'voice_minute') {
+      cost = 3; // 3 Credits per minute
+    } else if (taskType === 'voice_session') {
+      cost = 5; // 5 Credits per session (2-3 min)
+    } else {
+      // Standard Token Billing
+      cost = calculateCredits(inputTokens, outputTokens, model);
+    }
+
+    const multiplier = taskType.startsWith('voice') ? 1.0 : getMultiplier(model);
 
     const result = await prisma.$transaction(async (tx) => {
       const user = await tx.user.findUnique({
@@ -106,6 +113,27 @@ router.post('/consume', authMiddleware, async (req, res) => {
           error: 'insufficient_credits',
           balance: user.credits,
           required: cost
+        };
+      }
+
+      // 🕒 DAILY CAP CHECK: Limit to 50 credits per day
+      const startOfDay = new Date();
+      startOfDay.setHours(0, 0, 0, 0);
+      const dailyUsage = await tx.creditLog.aggregate({
+        where: {
+          userId: req.user.id,
+          type: 'consume',
+          createdAt: { gte: startOfDay }
+        },
+        _sum: { amount: true }
+      });
+      const consumedToday = Math.abs(dailyUsage._sum.amount || 0);
+      if (consumedToday + cost > 50) {
+        return {
+          success: false,
+          error: 'daily_limit_reached',
+          balance: user.credits,
+          message: 'You have reached your daily limit of 50 credits.'
         };
       }
 
@@ -170,15 +198,39 @@ router.post('/refund', authMiddleware, async (req, res) => {
   if (amount <= 0) return res.json({ success: true, refunded: 0 });
 
   try {
-    const refundAmount = Math.round(amount);
+    const requestedRefund = Math.round(amount);
 
-    const updatedUser = await prisma.user.update({
-      where: { id: req.user.id },
-      data: {
-        credits: { increment: refundAmount },
-        creditsConsumed: { decrement: refundAmount },
+    // 🛡️ Security: Prevent refund fraud (DEEP-03 fix)
+    const result = await prisma.$transaction(async (tx) => {
+      const user = await tx.user.findUnique({
+        where: { id: req.user.id },
+        select: { creditsConsumed: true }
+      });
+
+      if (!user) throw new Error('User not found');
+
+      // Cap the refund to what the user has actually consumed
+      const refundAmount = Math.min(requestedRefund, user.creditsConsumed);
+
+      if (refundAmount <= 0) {
+        return { success: true, refunded: 0, balance: user.credits };
       }
+
+      const updatedUser = await tx.user.update({
+        where: { id: req.user.id },
+        data: {
+          credits: { increment: refundAmount },
+          creditsConsumed: { decrement: refundAmount },
+        }
+      });
+      return { success: true, refunded: refundAmount, updatedUser };
     });
+
+    if (result.refunded === 0) {
+       return res.json({ success: true, refunded: 0, balance: result.balance || 0 });
+    }
+
+    const updatedUser = result.updatedUser;
 
     await prisma.creditLog.create({
       data: {
