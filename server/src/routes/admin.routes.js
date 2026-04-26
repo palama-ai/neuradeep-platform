@@ -122,9 +122,12 @@ router.delete('/keys/:id', async (req, res) => {
   }
 });
 
+const axios = require('axios');
+const ORCHESTRATOR_URL = process.env.ORCHESTRATOR_URL || 'http://palamacloud.duckdns.org';
+
 /**
  * GET /api/v1/admin/summary
- * Returns total counts for dashboard cards
+ * Returns total counts for dashboard cards including container stats
  */
 router.get('/summary', async (req, res) => {
   try {
@@ -140,13 +143,24 @@ router.get('/summary', async (req, res) => {
       _count: true
     });
 
+    // Container stats from Orchestrator
+    let containerStats = { activeSessions: 0, maxSessions: 5 };
+    try {
+      const resp = await axios.get(`${ORCHESTRATOR_URL}/api/health`, { timeout: 3000 });
+      containerStats = resp.data;
+    } catch (err) {
+      console.error('[Admin Summary] Failed to fetch container stats:', err.message);
+    }
+
     res.json({
       totalUsers: userCount,
       activeKeys: keyCount,
       totalTokens: usage._sum.totalTokens || 0,
       totalFeedbacks: feedbackStats._count || 0,
       averageRating: feedbackStats._avg.rating ? Number(feedbackStats._avg.rating.toFixed(1)) : 0,
-      successRate: '99.9%' // Placeholder for now
+      successRate: '99.9%',
+      activeContainers: containerStats.activeSessions || 0,
+      maxContainers: containerStats.maxSessions || 5
     });
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch summary' });

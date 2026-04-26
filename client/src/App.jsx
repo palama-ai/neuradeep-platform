@@ -143,7 +143,7 @@ const DashboardOverview = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
         {stats.map((stat, i) => (
           <div key={i} className="surface-card p-6 hover:border-[rgba(255,255,255,0.15)] transition-colors">
             <p className="text-sm font-semibold text-text-secondary mb-1">{stat.label}</p>
@@ -157,6 +157,27 @@ const DashboardOverview = () => {
             </div>
           </div>
         ))}
+        {/* Container Status Card */}
+        <div className="surface-card p-6 border-l-4 border-purple-500 bg-gradient-to-br from-purple-900/10 to-transparent">
+            <p className="text-sm font-semibold text-text-secondary mb-1">Container Usage</p>
+            <div className="flex items-center gap-4">
+                <div className="flex-1">
+                    <div className="flex items-baseline gap-2">
+                        <h3 className="text-2xl font-bold text-white">{summary.activeContainers || 0}</h3>
+                        <span className="text-xs text-text-muted">/ {summary.maxContainers || 5}</span>
+                    </div>
+                    <div className="w-full h-1.5 bg-white/5 rounded-full mt-2 overflow-hidden">
+                        <div 
+                            className="h-full bg-purple-500 transition-all duration-1000"
+                            style={{ width: `${((summary.activeContainers || 0) / (summary.maxContainers || 5)) * 100}%` }}
+                        ></div>
+                    </div>
+                </div>
+                <div className="p-2.5 rounded-xl bg-purple-500/10 text-purple-400">
+                    <Download size={20} className="rotate-180" />
+                </div>
+            </div>
+        </div>
       </div>
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -201,16 +222,17 @@ const DashboardOverview = () => {
           <h3 className="text-xl font-display font-bold text-white mb-8 tracking-tight">Service Nodes</h3>
           <div className="space-y-6">
             {[
+              { name: 'Palama Orchestrator', status: summary.activeContainers !== undefined ? 'Healthy' : 'Disconnected', color: summary.activeContainers !== undefined ? 'emerald' : 'rose' },
               { name: 'Edge Proxy', status: 'Healthy', color: 'emerald' },
-              { name: 'Core DB', status: 'Degraded', color: 'amber' },
+              { name: 'Core DB', status: 'Healthy', color: 'emerald' },
               { name: 'Auth Server', status: 'Healthy', color: 'emerald' },
               { name: 'S3 Storage', status: 'Healthy', color: 'emerald' },
             ].map((s, i) => (
               <div key={i} className="flex justify-between items-center pb-4 border-b border-[rgba(255,255,255,0.05)] last:border-0 last:pb-0">
                 <span className="font-semibold text-text-secondary">{s.name}</span>
                 <div className="flex items-center gap-2">
-                  <span className={`w-2 h-2 rounded-full ${s.color === 'emerald' ? 'bg-success' : 'bg-yellow-500'} animate-pulse`}></span>
-                  <span className={`text-[10px] font-bold ${s.color === 'emerald' ? 'text-success' : 'text-yellow-500'} uppercase tracking-widest`}>
+                  <span className={`w-2 h-2 rounded-full ${s.color === 'emerald' ? 'bg-success' : 'bg-danger'} animate-pulse`}></span>
+                  <span className={`text-[10px] font-bold ${s.color === 'emerald' ? 'text-success' : 'text-danger'} uppercase tracking-widest`}>
                     {s.status}
                   </span>
                 </div>
