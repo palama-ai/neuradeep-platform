@@ -48,7 +48,6 @@ const AdminGuard = ({ children }) => {
   return children;
 };
 
-// Dashboard Overview with Real Data
 const DashboardOverview = () => {
   const { user, token } = useAuthStore();
   const [summary, setSummary] = useState({ totalUsers: 0, activeKeys: 0, totalTokens: 0, successRate: '99.9%' });
@@ -247,6 +246,24 @@ const DashboardOverview = () => {
 };
 
 function App() {
+  const { logout } = useAuthStore();
+
+  useEffect(() => {
+    const interceptor = axios.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        if (error.response?.status === 401) {
+          console.warn('Session expired or unauthorized. Logging out...');
+          logout();
+          // Force a full page reload to the login page to clear any stale state
+          window.location.href = '/auth/login';
+        }
+        return Promise.reject(error);
+      }
+    );
+    return () => axios.interceptors.response.eject(interceptor);
+  }, [logout]);
+
   return (
     <BrowserRouter>
       <Routes>

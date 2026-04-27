@@ -4,6 +4,14 @@ const express = require('express');
 const { PrismaClient } = require('@prisma/client');
 const { authMiddleware, adminMiddleware } = require('../middleware/auth.middleware');
 const { encrypt } = require('../utils/encryption');
+const axios = require('axios');
+
+// Helper to handle BigInt serialization
+const serializeData = (data) => {
+  return JSON.parse(JSON.stringify(data, (key, value) =>
+    typeof value === 'bigint' ? value.toString() : value
+  ));
+};
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -152,7 +160,7 @@ router.get('/summary', async (req, res) => {
       console.error('[Admin Summary] Failed to fetch container stats:', err.message);
     }
 
-    res.json({
+    res.json(serializeData({
       totalUsers: userCount,
       activeKeys: keyCount,
       totalTokens: usage._sum.totalTokens || 0,
@@ -161,8 +169,9 @@ router.get('/summary', async (req, res) => {
       successRate: '99.9%',
       activeContainers: containerStats.activeSessions || 0,
       maxContainers: containerStats.maxSessions || 5
-    });
+    }));
   } catch (err) {
+    console.error('[Admin Summary Error]:', err);
     res.status(500).json({ error: 'Failed to fetch summary' });
   }
 });
@@ -231,7 +240,7 @@ router.get('/feedbacks', async (req, res) => {
  */
 router.get('/system-stats', async (req, res) => {
   try {
-    const token = req.headers.authorization; // Use current admin token
+    const token = req.headers.authorization;
     const resp = await axios.get(`${ORCHESTRATOR_URL}/api/admin/system-stats`, {
       headers: { Authorization: token },
       timeout: 10000
@@ -239,7 +248,11 @@ router.get('/system-stats', async (req, res) => {
     res.json(resp.data);
   } catch (err) {
     console.error('[Admin System Stats] Error:', err.message);
-    res.status(500).json({ error: 'Failed to fetch system stats from orchestrator' });
+    if (err.response) {
+        // Forward the exact error from orchestrator (401, 403, etc)
+        return res.status(err.response.status).json(err.response.data);
+    }
+    res.status(500).json({ error: 'Failed to fetch system stats from orchestrator: ' + err.message });
   }
 });
 
