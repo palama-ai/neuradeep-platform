@@ -59,8 +59,8 @@ const DashboardOverview = () => {
     const fetchSummary = async () => {
       try {
         const [summaryRes, analyticsRes] = await Promise.all([
-          axios.get('/api/v1/admin/summary', { headers: { Authorization: `Bearer ${token}` } }),
-          axios.get('/api/v1/admin/analytics', { headers: { Authorization: `Bearer ${token}` } })
+          axios.get('/api/v1/admin/summary'),
+          axios.get('/api/v1/admin/analytics')
         ]);
         setSummary(summaryRes.data);
         setAnalytics(analyticsRes.data);
@@ -246,28 +246,38 @@ const DashboardOverview = () => {
 };
 
 function App() {
-  const { token, logout } = useAuthStore();
+  const { logout } = useAuthStore();
 
   useEffect(() => {
-    if (token) {
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-    } else {
-      delete axios.defaults.headers.common['Authorization'];
-    }
+    // 1. Request Interceptor: Always attach the latest token from localStorage
+    const requestInterceptor = axios.interceptors.request.use(
+      (config) => {
+        const token = localStorage.getItem('token');
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
+        return config;
+      },
+      (error) => Promise.reject(error)
+    );
 
-    const interceptor = axios.interceptors.response.use(
+    // 2. Response Interceptor: Handle 401s (Expired/Unauthorized)
+    const responseInterceptor = axios.interceptors.response.use(
       (response) => response,
       (error) => {
         if (error.response?.status === 401) {
           console.warn('Session expired or unauthorized. Logging out...');
           logout();
-          // Force a full page reload to the login page to clear any stale state
           window.location.href = '/auth/login';
         }
         return Promise.reject(error);
       }
     );
-    return () => axios.interceptors.response.eject(interceptor);
+
+    return () => {
+      axios.interceptors.request.eject(requestInterceptor);
+      axios.interceptors.response.eject(responseInterceptor);
+    };
   }, [logout]);
 
   return (

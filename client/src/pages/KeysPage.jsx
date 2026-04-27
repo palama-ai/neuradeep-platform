@@ -15,9 +15,7 @@ const KeysPage = () => {
   const fetchKeys = async () => {
     setLoading(true);
     try {
-      const response = await axios.get('/api/v1/admin/keys', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await axios.get('/api/v1/admin/keys');
       setKeys(response.data);
     } catch (err) {
       console.error('Failed to fetch keys:', err);
@@ -33,9 +31,7 @@ const KeysPage = () => {
   const handleAddKey = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('/api/v1/admin/keys', newKey, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await axios.post('/api/v1/admin/keys', newKey);
       setShowAddForm(false);
       setNewKey({ provider: 'openrouter', apiKey: '', monthlyBudget: 100 });
       fetchKeys();
@@ -47,9 +43,7 @@ const KeysPage = () => {
   const deleteKey = async (id) => {
     if (!window.confirm('Are you sure you want to remove this key?')) return;
     try {
-      await axios.delete(`/api/v1/admin/keys/${id}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await axios.delete(`/api/v1/admin/keys/${id}`);
       fetchKeys();
     } catch (err) {
       console.error('Failed to delete key:', err);

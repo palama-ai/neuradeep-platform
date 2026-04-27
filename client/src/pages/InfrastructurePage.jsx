@@ -38,9 +38,7 @@ const InfrastructurePage = () => {
   const fetchStats = async () => {
     setRefreshing(true);
     try {
-      const res = await axios.get('/api/v1/admin/system-stats', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await axios.get('/api/v1/admin/system-stats');
       setStats(res.data);
     } catch (err) {
       console.error('Failed to fetch stats:', err);

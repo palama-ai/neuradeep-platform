@@ -10,14 +10,12 @@ const UsersPage = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [planFilter, setPlanFilter] = useState('');
-  const { token } = useAuthStore();
+  const { token } = useAuthStore(); // Keep for re-fetching on login if needed, though interceptor handles the header
 
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const response = await axios.get('/api/v1/admin/users', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await axios.get('/api/v1/admin/users');
       setUsers(response.data);
     } catch (err) {
       console.error('Failed to fetch users:', err);
@@ -32,9 +30,7 @@ const UsersPage = () => {
 
   const toggleUserStatus = async (id, currentStatus) => {
     try {
-      await axios.put(`/api/v1/admin/users/${id}`, { isActive: !currentStatus }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await axios.put(`/api/v1/admin/users/${id}`, { isActive: !currentStatus });
       fetchUsers();
     } catch (err) {
       console.error('Failed to toggle status:', err);

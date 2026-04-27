@@ -16,9 +16,7 @@ const ConfigPage = () => {
   useEffect(() => {
     const fetchConfig = async () => {
       try {
-        const res = await axios.get('/api/v1/admin/config/admin', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const res = await axios.get('/api/v1/admin/config/admin');
         const map = {};
         res.data.forEach(item => map[item.key] = item.value);
         setConfigs({
@@ -37,9 +35,7 @@ const ConfigPage = () => {
 
   const handleUpdate = async (key, value) => {
     try {
-      await axios.post('/api/v1/admin/config/admin', { key, value }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await axios.post('/api/v1/admin/config/admin', { key, value });
       setMessage(`Successfully updated ${key}!`);
       setTimeout(() => setMessage(''), 3000);
     } catch (err) {

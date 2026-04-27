@@ -17,9 +17,7 @@ const AnalyticsPage = () => {
   const fetchAnalytics = async () => {
     setLoading(true);
     try {
-      const response = await axios.get('/api/v1/admin/analytics', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await axios.get('/api/v1/admin/analytics');
       setData(response.data);
     } catch (err) {
       console.error('Failed to fetch analytics:', err);
