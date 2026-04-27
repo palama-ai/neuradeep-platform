@@ -18,6 +18,7 @@ import KeysPage from './pages/KeysPage';
 import AnalyticsPage from './pages/AnalyticsPage';
 import ConfigPage from './pages/ConfigPage';
 import FeedbacksPage from './pages/FeedbacksPage';
+import InfrastructurePage from './pages/InfrastructurePage';
 
 // Layout Components
 const AuthLayout = () => (
@@ -269,6 +270,7 @@ function App() {
           <Route path="keys" element={<KeysPage />} />
           <Route path="models" element={<ConfigPage />} />
           <Route path="analytics" element={<AnalyticsPage />} />
+          <Route path="infrastructure" element={<InfrastructurePage />} />
           <Route path="feedbacks" element={<FeedbacksPage />} />
           <Route path="settings" element={<div className="p-8 glass rounded-[2.5rem]">General settings module coming soon.</div>} />
         </Route>

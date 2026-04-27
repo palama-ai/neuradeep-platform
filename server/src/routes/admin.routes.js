@@ -225,4 +225,22 @@ router.get('/feedbacks', async (req, res) => {
   }
 });
 
+/**
+ * GET /api/v1/admin/system-stats
+ * Proxies system and container stats from Orchestrator
+ */
+router.get('/system-stats', async (req, res) => {
+  try {
+    const token = req.headers.authorization; // Use current admin token
+    const resp = await axios.get(`${ORCHESTRATOR_URL}/api/admin/system-stats`, {
+      headers: { Authorization: token },
+      timeout: 10000
+    });
+    res.json(resp.data);
+  } catch (err) {
+    console.error('[Admin System Stats] Error:', err.message);
+    res.status(500).json({ error: 'Failed to fetch system stats from orchestrator' });
+  }
+});
+
 module.exports = router;

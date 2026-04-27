@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Users, Key, BarChart3, Settings, LogOut, Zap, Cpu, MessageSquare } from 'lucide-react';
+import { LayoutDashboard, Users, Key, BarChart3, Settings, LogOut, Zap, Cpu, MessageSquare, Activity } from 'lucide-react';
 import useAuthStore from '../store/useAuthStore';
 
 const SidebarItem = ({ to, icon: Icon, label }) => (
@@ -48,6 +48,7 @@ const Sidebar = () => {
         <SidebarItem to="/dashboard/keys" icon={Key} label="API Keys" />
         <SidebarItem to="/dashboard/models" icon={Cpu} label="Models" />
         <SidebarItem to="/dashboard/analytics" icon={BarChart3} label="Analytics" />
+        <SidebarItem to="/dashboard/infrastructure" icon={Activity} label="Infrastructure" />
         <SidebarItem to="/dashboard/feedbacks" icon={MessageSquare} label="Feedbacks" />
       </nav>
 
