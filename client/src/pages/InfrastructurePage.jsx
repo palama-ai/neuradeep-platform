@@ -132,6 +132,7 @@ const InfrastructurePage = () => {
                 <th className="px-6 py-4">User / Container</th>
                 <th className="px-6 py-4">CPU Usage</th>
                 <th className="px-6 py-4">Memory Usage</th>
+                <th className="px-6 py-4">Time Left</th>
                 <th className="px-6 py-4">Network (RX/TX)</th>
                 <th className="px-6 py-4">Status</th>
               </tr>
@@ -169,6 +170,17 @@ const InfrastructurePage = () => {
                         <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
                           <div className="h-full bg-purple-500" style={{ width: `${c.memoryPercent}%` }}></div>
                         </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex flex-col gap-1">
+                        <div className="flex items-center gap-2">
+                          <div className={`w-2 h-2 rounded-full ${c.remainingMinutes < 5 ? 'bg-amber-500' : 'bg-success'}`}></div>
+                          <span className={`text-sm font-bold ${c.remainingMinutes < 5 ? 'text-amber-400' : 'text-white'}`}>
+                            {c.remainingMinutes} min
+                          </span>
+                        </div>
+                        <span className="text-[10px] text-text-muted">Expires in {c.remainingMinutes}m</span>
                       </div>
                     </td>
                     <td className="px-6 py-4">
