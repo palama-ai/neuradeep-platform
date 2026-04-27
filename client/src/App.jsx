@@ -246,9 +246,15 @@ const DashboardOverview = () => {
 };
 
 function App() {
-  const { logout } = useAuthStore();
+  const { token, logout } = useAuthStore();
 
   useEffect(() => {
+    if (token) {
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    } else {
+      delete axios.defaults.headers.common['Authorization'];
+    }
+
     const interceptor = axios.interceptors.response.use(
       (response) => response,
       (error) => {
