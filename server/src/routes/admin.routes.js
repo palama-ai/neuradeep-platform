@@ -130,7 +130,6 @@ router.delete('/keys/:id', async (req, res) => {
   }
 });
 
-const axios = require('axios');
 const ORCHESTRATOR_URL = process.env.ORCHESTRATOR_URL || 'http://palamacloud.duckdns.org';
 
 /**
