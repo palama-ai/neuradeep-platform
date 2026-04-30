@@ -116,26 +116,6 @@ router.post('/consume', authMiddleware, async (req, res) => {
         };
       }
 
-      // 🕒 DAILY CAP CHECK: Limit to 50 credits per day
-      const startOfDay = new Date();
-      startOfDay.setHours(0, 0, 0, 0);
-      const dailyUsage = await tx.creditLog.aggregate({
-        where: {
-          userId: req.user.id,
-          type: 'consume',
-          createdAt: { gte: startOfDay }
-        },
-        _sum: { amount: true }
-      });
-      const consumedToday = Math.abs(dailyUsage._sum.amount || 0);
-      if (consumedToday + cost > 50) {
-        return {
-          success: false,
-          error: 'daily_limit_reached',
-          balance: user.credits,
-          message: 'You have reached your daily limit of 50 credits.'
-        };
-      }
 
       const updatedUser = await tx.user.update({
         where: { id: req.user.id },
