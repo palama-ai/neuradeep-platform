@@ -79,6 +79,7 @@ const KeysPage = () => {
                   <option value="openrouter">OpenRouter</option>
                   <option value="groq">Groq</option>
                   <option value="gemini">Google Gemini</option>
+                  <option value="deepgram">Deepgram (Voice)</option>
                 </select>
               </div>
               <div>
@@ -124,6 +125,7 @@ const KeysPage = () => {
                 <div className={`p-3 rounded-2xl ${
                   key.provider === 'openrouter' ? 'bg-[rgba(59,130,246,0.1)] text-blue-400 border border-[rgba(59,130,246,0.2)]' :
                   key.provider === 'groq' ? 'bg-[rgba(99,102,241,0.1)] text-indigo-400 border border-[rgba(99,102,241,0.2)]' :
+                  key.provider === 'deepgram' ? 'bg-[rgba(236,72,153,0.1)] text-pink-400 border border-[rgba(236,72,153,0.2)]' :
                   'bg-[rgba(245,158,11,0.1)] text-amber-500 border border-[rgba(245,158,11,0.2)]'
                 }`}>
                   <Zap size={24} fill="currentColor" />
