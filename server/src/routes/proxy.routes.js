@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken');
 const axios = require('axios');
 const { PrismaClient } = require('@prisma/client');
 const { authMiddleware } = require('../middleware/auth.middleware');
+const { decrypt } = require('../utils/encryption');
 const { getMonthlyUsage, detectProvider, forwardRequest } = require('../services/llmProxy.service');
 
 const router = express.Router();
@@ -115,7 +116,10 @@ router.get('/voice/token', authMiddleware, async (req, res) => {
       return res.status(503).json({ error: 'Deepgram Voice API is currently unavailable (No key configured)' });
     }
 
-    const masterKey = deepgramKeyDoc.apiKey;
+    const masterKey = decrypt(deepgramKeyDoc.apiKey);
+    if (!masterKey) {
+        return res.status(500).json({ error: 'Failed to decrypt Deepgram API key' });
+    }
 
     // 1. Get the Project ID from Deepgram
     const projectRes = await axios.get('https://api.deepgram.com/v1/projects', {
